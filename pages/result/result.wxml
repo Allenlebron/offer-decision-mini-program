@@ -1,0 +1,147 @@
+<view class="page-shell result-page">
+  <view wx:if="{{empty}}" class="empty-state">
+    <view class="brand-mark" aria-hidden="true">真</view>
+    <text class="step-label">还没有可用结果</text>
+    <view class="empty-title" role="heading" aria-level="1">先完成一次 Offer 对比</view>
+    <text class="empty-copy">输入至少两个选项，我们会在本机算出保证年收入、有效时薪和关键反超条件。</text>
+    <button class="primary-button" bindtap="backToCalculator" hover-class="primary-button-active">开始填写条件</button>
+  </view>
+
+  <block wx:else>
+    <view class="result-hero">
+      <text class="step-label result-step">第 2 步 · 对比结果</text>
+      <view class="result-headline" role="heading" aria-level="1">{{headline}}</view>
+      <text class="result-caveat">全部按税前保证收入估算，未计个税、五险一金、试用期折扣、浮动奖金、股票和期权。</text>
+    </view>
+
+    <view class="result-list" aria-label="各选项结果">
+      <view
+        wx:for="{{resultCards}}"
+        wx:key="id"
+        wx:for-item="item"
+        class="result-option"
+        aria-labelledby="result-title-{{item.id}}"
+      >
+        <view class="result-option-header">
+          <view id="result-title-{{item.id}}" class="result-option-title" role="heading" aria-level="2">
+            <view class="option-dot" style="background:{{item.color}}" aria-hidden="true"></view>
+            <text>{{item.title}}</text>
+          </view>
+          <text class="result-delta mono-data">{{item.annualDelta}}</text>
+        </view>
+
+        <view class="leader-row" wx:if="{{item.annualLeader || item.hourlyLeader}}">
+          <text wx:if="{{item.annualLeader}}" class="leader-tag">年收入领先</text>
+          <text wx:if="{{item.hourlyLeader}}" class="leader-tag">有效时薪领先</text>
+        </view>
+
+        <view class="metric-row metric-row-primary">
+          <text>税前保证年收入</text>
+          <text class="metric-value mono-data">{{item.annualText}}</text>
+        </view>
+        <view class="metric-row metric-row-primary">
+          <text>税前有效时薪</text>
+          <text class="metric-value mono-data">{{item.hourlyText}}</text>
+        </view>
+        <view class="time-summary">
+          <text>年度占用 <text class="mono-data">{{item.workHoursText}}</text></text>
+          <text>其中通勤 <text class="mono-data">{{item.commuteHoursText}}</text></text>
+        </view>
+        <text wx:if="{{item.hourlyDelta}}" class="hourly-delta">相比当前工作：{{item.hourlyDelta}}</text>
+      </view>
+    </view>
+
+    <view class="comparison-section">
+      <view class="comparison-block">
+        <text class="comparison-title" role="heading" aria-level="2">税前保证年收入</text>
+        <view wx:for="{{annualRows}}" wx:key="id" wx:for-item="row" class="chart-row">
+          <view class="chart-label-row">
+            <view class="chart-name">
+              <view class="option-dot small" style="background:{{row.color}}" aria-hidden="true"></view>
+              <text>{{row.title}}</text>
+            </view>
+            <text class="mono-data">{{row.valueText}}</text>
+          </view>
+          <view class="chart-track" aria-label="{{row.title}}税前保证年收入{{row.valueText}}">
+            <view class="chart-fill" style="width:{{row.width}};background:{{row.color}}"></view>
+          </view>
+        </view>
+      </view>
+
+      <view class="comparison-block">
+        <text class="comparison-title" role="heading" aria-level="2">税前有效时薪</text>
+        <view wx:for="{{hourlyRows}}" wx:key="id" wx:for-item="row" class="chart-row">
+          <view class="chart-label-row">
+            <view class="chart-name">
+              <view class="option-dot small" style="background:{{row.color}}" aria-hidden="true"></view>
+              <text>{{row.title}}</text>
+            </view>
+            <text class="mono-data">{{row.valueText}}</text>
+          </view>
+          <view class="chart-track" aria-label="{{row.title}}税前有效时薪{{row.valueText}}">
+            <view class="chart-fill" style="width:{{row.width}};background:{{row.color}}"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{breakEven}}" class="break-even">
+      <text class="break-even-label">关键反超条件</text>
+      <view class="break-even-title" role="heading" aria-level="2">
+        <text>{{breakEven.challengerTitle}} 要追平 {{breakEven.winnerTitle}} 的税前有效时薪，需要再增加 </text>
+        <text class="break-even-number mono-data">{{breakEven.extraBonusMonths}} 个月月薪{{breakEven.weeklyHoursReduction === null ? '。' : ''}}</text>
+        <block wx:if="{{breakEven.weeklyHoursReduction !== null}}">
+          <text>，或者每周少工作 </text>
+          <text class="break-even-number mono-data">{{breakEven.weeklyHoursReduction}} 小时。</text>
+        </block>
+      </view>
+      <text class="break-even-help">这不是替你做决定，而是告诉你：哪些条件值得继续向 HR 确认和谈判。</text>
+    </view>
+
+    <view class="result-actions">
+      <button class="share-button" open-type="share" hover-class="share-button-active">分享结果摘要</button>
+      <button class="recalculate-button" bindtap="editConditions" hover-class="recalculate-button-active">修改条件重算</button>
+    </view>
+
+    <view class="feedback-section">
+      <text class="step-label">第 3 步 · 决定下一步</text>
+      <view class="feedback-title" role="heading" aria-level="2">这个结果，让你下一步想做什么？</view>
+      <text class="feedback-copy">只记录选项，不上传你的薪资和公司信息。</text>
+
+      <view class="feedback-grid" role="group" aria-label="下一步行动">
+        <button
+          wx:for="{{feedbackOptions}}"
+          wx:key="label"
+          wx:for-item="option"
+          class="feedback-button {{option.selected ? 'feedback-button-selected' : ''}}"
+          data-value="{{option.label}}"
+          bindtap="selectFeedback"
+          hover-class="feedback-button-active"
+          aria-pressed="{{option.selected ? 'true' : 'false'}}"
+        >{{option.label}}</button>
+      </view>
+
+      <button
+        wx:if="{{selectedFeedback}}"
+        class="receipt-button"
+        bindtap="copyReceipt"
+        hover-class="receipt-button-active"
+        loading="{{isCopying}}"
+        disabled="{{isCopying}}"
+        aria-busy="{{isCopying ? 'true' : 'false'}}"
+      >{{isCopying ? '正在复制' : '复制匿名验证回执'}}</button>
+      <text wx:if="{{receiptStatus}}" class="receipt-status" role="status" aria-live="polite">{{receiptStatus}}</text>
+    </view>
+
+    <view class="result-footer">
+      <view class="footer-brand">
+        <view class="brand-mark small" aria-hidden="true">真</view>
+        <view>
+          <text class="footer-title">真涨薪 · Offer 真实价值验证版</text>
+          <text class="footer-copy">结果为估算，不构成税务或职业建议。</text>
+        </view>
+      </view>
+      <button class="clear-button" bindtap="clearLocalData" hover-class="clear-button-active">清除本机数据</button>
+    </view>
+  </block>
+</view>

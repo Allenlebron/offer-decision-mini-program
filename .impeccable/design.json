@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-18T00:00:00.000Z",
+  "title": "Design System: 真涨薪微信小程序",
+  "extensions": {
+    "colorMeta": {
+      "surface-page": {
+        "role": "neutral",
+        "displayName": "冷静底色",
+        "canonical": "#F5F6F2",
+        "tonalRamp": ["#17201C", "#344039", "#56635C", "#7B8881", "#A4AEA8", "#CDD3CF", "#E8EBE8", "#F5F6F2"]
+      },
+      "surface-dark": {
+        "role": "primary",
+        "displayName": "深林墨色",
+        "canonical": "#13221C",
+        "tonalRamp": ["#07100C", "#13221C", "#2A4036", "#466052", "#668274", "#8EA99B", "#BDD0C6", "#EDF5F1"]
+      },
+      "accent-primary": {
+        "role": "primary",
+        "displayName": "判断荧光",
+        "canonical": "#D7F55F",
+        "tonalRamp": ["#253000", "#465800", "#687F09", "#8BA827", "#AED344", "#D7F55F", "#E8FA9D", "#F6FDDA"]
+      },
+      "accent-attention": {
+        "role": "tertiary",
+        "displayName": "谈判珊瑚",
+        "canonical": "#F27655",
+        "tonalRamp": ["#3A0B02", "#6B1D0D", "#963622", "#C35236", "#F27655", "#F69A81", "#FBC6B7", "#FDEBE5"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "账单标题",
+        "purpose": "输入页和关键结论的编辑式标题。"
+      },
+      "body": {
+        "displayName": "原生正文",
+        "purpose": "字段、按钮和说明使用的系统字体。"
+      }
+    },
+    "shadows": [
+      {
+        "name": "sticky-submit",
+        "value": "0 -3px 6px rgba(19,34,28,0.08)",
+        "purpose": "仅说明底部提交栏覆盖在滚动内容之上。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "180ms ease-out",
+        "purpose": "按压、选中和错误状态反馈。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow-phone",
+        "value": "360px"
+      },
+      {
+        "name": "content-cap",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "深色、直接、保持 52px 触控高度。",
+      "html": "<button class=\"ds-btn-primary\">算清真实涨幅 →</button>",
+      "css": ".ds-btn-primary{min-height:52px;padding:0 20px;border:0;border-radius:4px;background:#13221c;color:#fbfcf8;font:700 16px system-ui}.ds-btn-primary:hover{background:#254237}.ds-btn-primary:focus-visible{outline:3px solid #f27655;outline-offset:3px}"
+    },
+    {
+      "name": "Share Button",
+      "kind": "button",
+      "refersTo": "button-share",
+      "description": "结果页唯一的荧光主动作。",
+      "html": "<button class=\"ds-btn-share\">分享结果摘要</button>",
+      "css": ".ds-btn-share{min-height:52px;padding:0 20px;border:0;border-radius:4px;background:#d7f55f;color:#13221c;font:700 16px system-ui}.ds-btn-share:hover{background:#c8e74d}.ds-btn-share:focus-visible{outline:3px solid #f27655;outline-offset:3px}"
+    },
+    {
+      "name": "Offer Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "右对齐数字、可见单位和底线焦点。",
+      "html": "<label class=\"ds-field\">税前月薪 <span><input value=\"25000\" aria-label=\"税前月薪\"> 元</span></label>",
+      "css": ".ds-field{display:flex;align-items:center;justify-content:space-between;min-height:56px;color:#13221c;font:600 16px system-ui}.ds-field input{width:120px;border:0;border-bottom:1px solid #74827b;background:transparent;color:#13221c;font:700 17px ui-monospace;text-align:right}.ds-field input:focus{outline:0;border-bottom-color:#b83c20;box-shadow:0 2px 0 -1px #b83c20}"
+    },
+    {
+      "name": "Selected Feedback",
+      "kind": "button",
+      "description": "不只靠颜色表达的下一步选中状态。",
+      "html": "<button class=\"ds-feedback\" aria-pressed=\"true\">重新谈薪</button>",
+      "css": ".ds-feedback{min-height:52px;padding:0 20px;border:1px solid #8d2618;border-radius:4px;background:#d7f55f;color:#13221c;box-shadow:inset 0 0 0 2px #f5f6f2,inset 0 0 0 3px #8d2618;font:700 16px system-ui}.ds-feedback:focus-visible{outline:3px solid #8d2618;outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "一张清醒的账",
+    "overview": "界面像一张随手可核对的职业决策账单：标题有编辑感，但输入、数字和按钮必须像成熟工具一样直接。手机上的用户往往正处于通勤或谈薪前的焦虑状态，信息层级应帮助他们从条件进入数字，再落到下一步。",
+    "keyCharacteristics": [
+      "先输入、后结论的两页任务流。",
+      "宋体只负责关键标题，系统无衬线负责所有操作和说明。",
+      "三个选项始终使用固定灰、蓝、绿映射。",
+      "深色只用于结果阶段和主动作，不作为装饰背景。",
+      "所有核心触控目标不小于 44px。"
+    ],
+    "rules": [
+      {
+        "name": "Fixed Option Rule",
+        "body": "当前工作永远是灰色、Offer A 永远是蓝色、Offer B 永远是绿色。",
+        "section": "colors"
+      },
+      {
+        "name": "Interface Type Rule",
+        "body": "UI 标签、按钮和数据一律使用系统字体；宋体只承担阅读层级。",
+        "section": "typography"
+      },
+      {
+        "name": "Flat by Default Rule",
+        "body": "默认用色块、分隔线和间距表达层级，不使用悬浮卡片。",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do 保持两页结构，让用户在结果页返回修改条件。",
+      "Do 明示 48 个工作周、240 个通勤日和税前估算边界。"
+    ],
+    "donts": [
+      "Don't 做成喧闹招聘广告、金融仪表盘、玻璃拟态 SaaS 模板或游戏化打分器。",
+      "Don't 交换当前工作、Offer A、Offer B 的灰、蓝、绿颜色映射。"
+    ]
+  }
+}
