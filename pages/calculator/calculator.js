@@ -19,6 +19,7 @@ const {
   getMetrics,
   updateMetrics,
 } = require("../../utils/storage");
+const { buildSharePath, enableShareMenu } = require("../../utils/share");
 
 const FIELD_PRESENTATION = {
   monthlySalary: {
@@ -146,6 +147,7 @@ Page({
   },
 
   onLoad() {
+    enableShareMenu();
     let jobs = cloneJobs(BLANK_JOBS);
     try {
       const storedDraft = wx.getStorageSync(DRAFT_KEY);
@@ -470,13 +472,14 @@ Page({
     updateMetrics({ shares: metrics.shares + 1 });
     return {
       title: "这次跳槽，真的涨薪了吗？",
-      path: "/pages/calculator/calculator",
+      path: buildSharePath("calculator"),
     };
   },
 
   onShareTimeline() {
     return {
       title: "真涨薪｜Offer 真实价值对比",
+      query: "source=timeline_calculator",
     };
   },
 });

@@ -12,6 +12,7 @@ const {
   getMetrics,
   updateMetrics,
 } = require("../../utils/storage");
+const { buildSharePath, enableShareMenu } = require("../../utils/share");
 
 function formatWanDifference(value) {
   const prefix = value >= 0 ? "+" : "−";
@@ -71,6 +72,7 @@ Page({
   },
 
   onLoad() {
+    enableShareMenu();
     this.loadResult();
   },
 
@@ -229,13 +231,14 @@ Page({
     updateMetrics({ shares: metrics.shares + 1 });
     return {
       title: this.data.headline || "这次跳槽，真的涨薪了吗？",
-      path: "/pages/calculator/calculator",
+      path: buildSharePath("result"),
     };
   },
 
   onShareTimeline() {
     return {
       title: this.data.headline || "真涨薪｜Offer 真实价值对比",
+      query: "source=timeline_result",
     };
   },
 });

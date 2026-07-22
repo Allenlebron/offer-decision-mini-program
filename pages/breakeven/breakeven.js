@@ -1,6 +1,7 @@
 const { calculateJob, analyzeResults } = require("../../utils/offer-analysis");
 const { validateJobs, isValidDraft } = require("../../utils/offer-validation");
-const { RESULT_KEY } = require("../../utils/storage");
+const { RESULT_KEY, getMetrics, updateMetrics } = require("../../utils/storage");
+const { buildSharePath, enableShareMenu } = require("../../utils/share");
 
 function toNumber(value) {
   return Number.parseFloat(value);
@@ -88,6 +89,7 @@ Page({
   },
 
   onLoad() {
+    enableShareMenu();
     let payload;
     try {
       payload = wx.getStorageSync(RESULT_KEY);
@@ -197,5 +199,21 @@ Page({
     const pages = getCurrentPages();
     if (pages.length > 1) wx.navigateBack();
     else wx.reLaunch({ url: "/pages/result/result" });
+  },
+
+  onShareAppMessage() {
+    const metrics = getMetrics();
+    updateMetrics({ shares: metrics.shares + 1 });
+    return {
+      title: "算清收入和时间，看看哪个 Offer 更值",
+      path: buildSharePath("breakeven"),
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: "真涨薪｜关键反超条件",
+      query: "source=timeline_breakeven",
+    };
   },
 });

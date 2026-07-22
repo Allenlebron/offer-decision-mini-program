@@ -30,6 +30,7 @@ const sourceFiles = [
   "pages/calculator/calculator.js",
   "pages/result/result.js",
   "pages/breakeven/breakeven.js",
+  "utils/share.js",
   "utils/offer-analysis.js",
   "utils/offer-validation.js",
 ];
@@ -45,6 +46,13 @@ const calculatorTemplate = readFileSync(
 );
 assert.match(calculatorTemplate, /aria-label=/);
 assert.match(calculatorTemplate, /field-error/);
+
+const resultTemplate = readFileSync(
+  join(root, "pages/result/result.wxml"),
+  "utf8",
+);
+assert.match(resultTemplate, /open-type="share"/);
+assert.match(resultTemplate, /分享给朋友/);
 
 const breakEvenTemplate = readFileSync(
   join(root, "pages/breakeven/breakeven.wxml"),

@@ -80,7 +80,7 @@
     <view class="result-action-bar">
       <view class="result-action-inner">
         <button class="edit-button" bindtap="editConditions" hover-class="edit-button-active">修改条件</button>
-        <button class="share-button" open-type="share" hover-class="share-button-active">分享结果</button>
+        <button class="share-button" open-type="share" hover-class="share-button-active">分享给朋友</button>
       </view>
     </view>
   </block>

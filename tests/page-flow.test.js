@@ -17,6 +17,7 @@ function createWxHarness() {
     navigateTo: [],
     pageScrollTo: [],
     reLaunch: [],
+    shareMenus: [],
     toasts: [],
   };
 
@@ -56,6 +57,9 @@ function createWxHarness() {
       showModal(options) {
         calls.modals.push(options);
         options.success?.(modalResponses.shift() || { confirm: false });
+      },
+      showShareMenu(options) {
+        calls.shareMenus.push(options.menus);
       },
     },
   };
@@ -155,7 +159,20 @@ test("runs the real calculator and result page flow", () => {
 
   const share = result.onShareAppMessage();
   assert.equal(share.title, result.data.headline);
+  assert.equal(share.path, "/pages/calculator/calculator?source=result");
   assert.equal(harness.storage.get(METRICS_KEY).shares, 1);
+
+  const breakEvenShare = breakEven.onShareAppMessage();
+  assert.equal(
+    breakEvenShare.path,
+    "/pages/calculator/calculator?source=breakeven",
+  );
+  assert.equal(harness.storage.get(METRICS_KEY).shares, 2);
+  assert.deepEqual(harness.calls.shareMenus, [
+    ["shareAppMessage", "shareTimeline"],
+    ["shareAppMessage", "shareTimeline"],
+    ["shareAppMessage", "shareTimeline"],
+  ]);
 });
 
 test("guides users through one job at a time and supports quick values", () => {
