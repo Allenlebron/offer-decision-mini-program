@@ -2,56 +2,55 @@
 name: 真涨薪微信小程序
 description: 把收入与被工作占用的时间放在同一张账上
 colors:
-  surface-page: "#F5F6F2"
+  surface-page: "#F4F7FC"
   surface-raised: "#FFFFFF"
-  surface-muted: "#E8EBE6"
-  surface-dark: "#13221C"
-  surface-attention: "#FFF0EA"
-  text-primary: "#13221C"
-  text-secondary: "#415149"
-  text-on-dark: "#FBFCF8"
-  accent-primary: "#D7F55F"
-  accent-attention: "#F27655"
-  option-current: "#74827B"
-  option-a: "#79A6DF"
-  option-b: "#A8C936"
-  error: "#8D2618"
+  surface-muted: "#EDF1F7"
+  surface-dark: "#071426"
+  surface-panel: "#0B1B30"
+  text-primary: "#101827"
+  text-secondary: "#526178"
+  text-muted-dark: "#A8B6CA"
+  text-on-dark: "#F7F9FC"
+  accent-primary: "#2463FF"
+  accent-secondary: "#75A5FF"
+  accent-attention: "#FFB54A"
+  error: "#A12F39"
 typography:
   display:
-    fontFamily: "Songti SC, STSong, serif"
-    fontSize: "56rpx"
-    fontWeight: 700
-    lineHeight: 1.08
-    letterSpacing: "-0.035em"
+    fontFamily: "-apple-system, BlinkMacSystemFont, PingFang SC, sans-serif"
+    fontSize: "28px"
+    fontWeight: 650
+    lineHeight: 1.2
+    letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Songti SC, STSong, serif"
-    fontSize: "44rpx"
-    fontWeight: 700
+    fontFamily: "-apple-system, BlinkMacSystemFont, PingFang SC, sans-serif"
+    fontSize: "28px"
+    fontWeight: 650
     lineHeight: 1.2
     letterSpacing: "-0.03em"
   title:
     fontFamily: "-apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif"
-    fontSize: "38rpx"
-    fontWeight: 700
+    fontSize: "17px"
+    fontWeight: 650
     lineHeight: 1.35
   body:
     fontFamily: "-apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif"
-    fontSize: "32rpx"
+    fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.5
   label:
     fontFamily: "-apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif"
-    fontSize: "28rpx"
-    fontWeight: 700
+    fontSize: "14px"
+    fontWeight: 650
     lineHeight: 1.5
   meta:
     fontFamily: "-apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif"
-    fontSize: "26rpx"
+    fontSize: "12px"
     fontWeight: 600
     lineHeight: 1.5
   data:
-    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace"
-    fontSize: "34rpx"
+    fontFamily: "inherit"
+    fontSize: "15px"
     fontWeight: 700
     lineHeight: 1.5
 rounded:
@@ -67,14 +66,14 @@ spacing:
   xxl: "64rpx"
 components:
   button-primary:
-    backgroundColor: "{colors.surface-dark}"
+    backgroundColor: "{colors.accent-primary}"
     textColor: "{colors.text-on-dark}"
     rounded: "{rounded.sm}"
     height: "52px"
     padding: "0 28rpx"
   button-share:
     backgroundColor: "{colors.accent-primary}"
-    textColor: "{colors.text-primary}"
+    textColor: "{colors.text-on-dark}"
     rounded: "{rounded.sm}"
     height: "52px"
   input:
@@ -82,15 +81,15 @@ components:
     textColor: "{colors.text-primary}"
     height: "44px"
   option-current:
-    backgroundColor: "#E4E8E3"
+    backgroundColor: "#FFFFFF"
     textColor: "{colors.text-primary}"
     rounded: "{rounded.md}"
   option-a:
-    backgroundColor: "#E4EEFB"
+    backgroundColor: "#FFFFFF"
     textColor: "{colors.text-primary}"
     rounded: "{rounded.md}"
   option-b:
-    backgroundColor: "#EDF6C9"
+    backgroundColor: "#FFFFFF"
     textColor: "{colors.text-primary}"
     rounded: "{rounded.md}"
 ---
@@ -103,68 +102,68 @@ components:
 
 界面像一张随手可核对的职业决策账单：标题有编辑感，但输入、数字和按钮必须像成熟工具一样直接。手机上的用户往往正处于通勤或谈薪前的焦虑状态，信息层级应帮助他们从条件进入数字，再落到下一步，而不是制造额外兴奋。
 
-整体采用克制的浅色任务界面，结果区用深绿色形成明确阶段切换。系统拒绝喧闹招聘广告、堆满大数字的金融仪表盘、玻璃拟态 SaaS 模板和游戏化打分器。
+整体采用“浅色录入、深色判断”的双阶段界面。录入页用冷白画布降低输入负担，结果与反超试算页切换为深海军蓝，让用户明确进入决策阶段。克制的电光蓝承担主动作，琥珀色只标记真正值得谈的条件。
 
 **Key Characteristics:**
 
-- 先输入、后结论的两页任务流。
-- 宋体只负责关键标题，系统无衬线负责所有操作和说明。
-- 三个选项始终使用固定灰、蓝、绿映射。
-- 深色只用于结果阶段和主动作，不作为装饰背景。
+- 录入、结果、反超试算的三页任务流；输入页一次只展示一份工作的字段。
+- 工作切换、填写进度和底部主动作共同表达当前位置，高频数字优先点选。
+- 结果页先回答“钱更多”和“时间更值钱”，反超页再把差距换成可谈条件。
+- 系统无衬线负责标题、操作和说明，以字重和留白建立层级。
+- 蓝色用于选择、领先和主要动作；琥珀色仅用于关键差额和追平条件。
+- 深色只覆盖结果与试算阶段，不渗入录入表单。
 - 所有核心触控目标不小于 44px。
 
 ## Colors
 
-颜色服务于选项识别和状态反馈；任何高饱和色都必须承担明确语义。
+颜色服务于阶段切换、选择反馈和关键数字；任何高饱和色都必须承担明确语义。
 
 ### Primary
 
-- **深林墨色**：主文字、主要按钮和结果背景，是整个产品的可信度锚点。
-- **判断荧光**：仅用于主要分享动作、领先标签和已选反馈，稀缺使用才有效。
+- **深海军蓝**：结果页与反超页背景，是产品的可信度锚点。
+- **电光蓝**：选中态、领先项和主要按钮。
 
 ### Secondary
 
-- **当前工作灰**：当前工作的圆点、条形图和浅底。
-- **Offer A 蓝**：Offer A 的圆点、条形图和浅底。
-- **Offer B 绿**：Offer B 的圆点、条形图和浅底。
+- **冰蓝**：辅助信息、次级领先项和深色背景上的弱强调。
+- **冷白**：输入页背景，确保长表单仍然轻盈。
 
 ### Tertiary
 
-- **谈判珊瑚**：标题下划线、关键反超条件和注意状态，不用于普通装饰。
+- **琥珀色**：关键反超条件和可谈差额，不用于普通装饰。
 - **错误砖红**：输入错误、危险确认和复制失败状态。
 
 ### Neutral
 
-- **冷静底色**：页面基础表面，不做暖黄纸张效果。
-- **次级墨绿**：帮助文字和说明，仍保持正文级对比度。
+- **白色**：输入分组、深色页面主数字和主要按钮文字。
+- **蓝灰**：帮助文字、分隔线和非重点数据。
 
-**The Fixed Option Rule.** 当前工作永远是灰色、Offer A 永远是蓝色、Offer B 永远是绿色；输入页、结果卡和图表禁止交换。
+**The Accent Rule.** 同一屏只允许一个电光蓝主动作；琥珀色只回答“差多少、要谈多少”，不能用于普通装饰。
 
 ## Typography
 
-**Display Font:** Songti SC（STSong 后备）
+**Display Font:** 系统无衬线（SF Pro / PingFang SC / Roboto）
 
 **Body Font:** 系统无衬线（PingFang SC 与 Microsoft YaHei 后备）
 
-**Label/Mono Font:** ui-monospace / SFMono-Regular / Menlo，仅用于金额、比例与编号。
+**Data Style:** 数据沿用系统字体，通过 `tabular-nums` 对齐数字，不使用代码字体。
 
-**Character:** 宋体提供“认真看一笔账”的编辑气质；系统字体保持原生小程序的熟悉感。两者职责严格分开，不用展示字体装饰按钮或字段标签。
+**Character:** 依靠紧凑字距、克制字重和充足留白建立高级感，不用装饰字体增加阅读负担。
 
 ### Hierarchy
 
-- **Display**（700，56rpx，1.08）：仅用于输入页主标题。
-- **Headline**（700，44–48rpx，1.2）：结果结论与反馈问题；长句式反超条件允许使用 40–44rpx、1.45。
-- **Title**（700，38–40rpx，1.35）：选项标题和图表标题。
-- **Body**（400，32rpx，1.5–1.75）：说明、字段与结果行。
-- **Label**（700，28rpx，1.5）：步骤、错误、标签和辅助动作。
-- **Meta**（600–700，26rpx，1.5）：仅用于工作编号、隐私短标、领先标签、提交摘要和页脚说明。
-- **Data**（700，34rpx，1.5）：输入数字与结果主指标；必须使用等宽数字。
+- **Headline**（650，28px，1.24）：结果结论；长句自然换行，窄屏不缩字号。
+- **Title**（650，16–17px，1.35）：分组与结果区标题。
+- **Body**（400，14–16px，1.5–1.65）：说明、字段与结果行。
+- **Label**（600–650，13–14px，1.4）：字段、按钮和错误信息。
+- **Meta**（600，12px，1.5）：仅用于隐私短标、领先标签、提交摘要和页脚说明。
+- **Data**（650–700，13–23px）：按信息层级变化，并统一启用等宽数字特性。
 
-**The Interface Type Rule.** UI 标签和按钮一律使用系统字体，数据使用等宽字体；宋体只出现在承担阅读层级的标题和孤立品牌字形。
+**The Interface Type Rule.** 标题、标签、按钮和数据都使用系统字体；数据仅启用等宽数字特性，不混入代码字体。
 
 ## Elevation
 
-系统以色块、分隔线和阶段背景表达层级，默认不使用悬浮卡片。唯一固定阴影位于输入页底部提交栏，用于说明它覆盖在滚动内容之上；阴影模糊不超过 6px。
+系统只用纯色色块、细边框和阶段背景表达层级。固定操作栏用分隔线说明覆盖关系，按钮与卡片默认无阴影、无发光。
 
 **The Flat by Default Rule.** 如果一个容器同时需要明显边框和宽阴影，说明结构分组错误；先用间距和色调重写。
 
@@ -173,28 +172,27 @@ components:
 ### Buttons
 
 - **Shape:** 轻微圆角（8rpx），不用胶囊主按钮。
-- **Primary:** 深林墨色底、近白文字，高度 52px；加载时保留原宽度并禁用重复点击。
-- **Share:** 判断荧光底、深色文字，只出现在结果阶段。
+- **Primary:** 电光蓝底、白色文字，高度 52px；加载时保留原宽度并禁用重复点击。
+- **Share:** 与主动作统一使用电光蓝底，只出现在结果阶段。
 - **Focus / Active:** 按压时切换为更深或更浅的语义色；所有可见按钮保持至少 44px 触控高度。
 
 ### Chips
 
-- **Style:** 胶囊仅用于“本地计算”“税前估算”和领先状态等短标签。
-- **State:** 已选反馈不是普通标签，必须同时显示荧光底、砖红外框和 `aria-pressed`。
+- **Style:** 胶囊仅用于领先状态等极短标签，采用电光蓝或琥珀色，必须同时保留文字含义。
 
 ### Cards / Containers
 
-- **Corner Style:** 工作选项使用 12rpx；结果选项不做卡片，直接在深色结果区以分隔线组织。
-- **Background:** 三个输入选项分别使用固定浅灰、浅蓝、浅绿。
+- **Corner Style:** 输入分组、结果表格和试算卡使用 10–12px；内部控件使用 7–8px。
+- **Background:** 输入分组使用白底；结果表格与试算卡使用比页面略亮的深蓝面板。
 - **Shadow Strategy:** 默认无阴影。
-- **Border:** 工作选项使用 2rpx 深色整框，禁止彩色侧边条。
+- **Border:** 浅色页使用极浅蓝灰边框，深色页使用半透明蓝灰边框，禁止彩色侧边条。
 - **Internal Padding:** 24–32rpx；相关字段紧凑，选项之间保持 32rpx。
 
 ### Inputs / Fields
 
-- **Style:** 可见标签在左，数字和单位在右；输入区以底线表达，不用占位符代替标签。
+- **Style:** 标签与解释位于左侧，数字和单位在右侧；高频字段显示一行四个快捷值，不用占位符冒充已填数据。
 - **Touch Target:** 原生输入区高度至少 44px；这个无障碍下限不计入 rpx 间距阶梯。
-- **Focus:** 底线切换为谈判珊瑚色，并显示短焦点阴影。
+- **Focus:** 底线或外框切换为电光蓝，并显示克制焦点反馈。
 - **Error / Disabled:** 错误文字紧邻字段，说明合法范围；计算按钮加载时禁止重复触发。
 
 ### Navigation
@@ -203,16 +201,16 @@ components:
 
 ### Result Comparison
 
-结果以“结论 → 每个选项 → 双图表 → 反超条件 → 下一步反馈”排列。条形图必须带文字值和固定颜色圆点，禁止只靠颜色表达结果。
+结果以“结论 → 横向数据表 → 相比当前工作的差额 → 反超试算”排列，不提供只改变高亮的伪切换。数据表同时显示文字值与领先标签，禁止只靠颜色表达结果。反超页提供全部两两组合，滑杆实时计算且不回写原始薪资数据。
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** 保持两页结构，让用户在结果页返回修改条件。
+- **Do** 保持三页结构，让用户在结果页返回修改，也能进入独立反超试算。
 - **Do** 在 320px 等效窄屏上保证按钮至少 44px，并允许长结论自然换行。
 - **Do** 明示 48 个工作周、240 个通勤日和税前估算边界。
-- **Do** 为清除数据、分享、复制、校验和选中状态提供明确反馈。
+- **Do** 为清除数据、分享、校验和选中状态提供明确反馈。
 
 ### Don't:
 
@@ -220,4 +218,4 @@ components:
 - **Don't** 使用彩色 `border-left` / `border-right` 侧边条、渐变文字或装饰性网格背景。
 - **Don't** 把占位符当标签，也不要用“输入错误”“提交”“确定”等模糊文案。
 - **Don't** 输出无法解释的综合分数或把税前估算包装成税后精确结论。
-- **Don't** 交换当前工作、Offer A、Offer B 的灰、蓝、绿颜色映射。
+- **Don't** 把反超试算值自动写回录入页，或把临时假设冒充已确认薪资。

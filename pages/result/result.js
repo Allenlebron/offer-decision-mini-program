@@ -3,7 +3,6 @@ const { validateJobs, isValidDraft } = require("../../utils/offer-validation");
 const {
   formatMoney,
   formatWan,
-  formatDelta,
   formatHours,
 } = require("../../utils/format");
 const {
@@ -14,33 +13,61 @@ const {
   updateMetrics,
 } = require("../../utils/storage");
 
-const FEEDBACK_OPTIONS = ["补问 HR", "重新谈薪", "更确定原选择", "没有帮助"];
-
-function optionColor(id) {
-  return {
-    current: "#74827B",
-    offerA: "#79A6DF",
-    offerB: "#A8C936",
-  }[id];
+function formatWanDifference(value) {
+  const prefix = value >= 0 ? "+" : "−";
+  return `${prefix}${(Math.abs(value) / 10000).toFixed(1)}万`;
 }
 
-function barWidth(value, maximum) {
-  if (!maximum) return "8%";
-  return `${Math.max(8, (value / maximum) * 100).toFixed(1)}%`;
+function formatHourlyDifference(value) {
+  const rounded = Math.round(Math.abs(value));
+  return `${value >= 0 ? "+" : "−"}${rounded}/时`;
+}
+
+function createInsightRows(analysis) {
+  const current = analysis.current;
+  const annualLeader = analysis.annualLeaders[0];
+  const hourlyLeader = analysis.hourlyLeaders[0];
+  const occupiedDelta = current.totalHours - hourlyLeader.totalHours;
+
+  return [
+    {
+      id: "annual",
+      label: `${annualLeader.title} 年收入`,
+      value: formatWanDifference(
+        annualLeader.guaranteedAnnual - current.guaranteedAnnual,
+      ),
+      tone: "blue",
+    },
+    {
+      id: "hourly",
+      label: `${hourlyLeader.title} 有效时薪`,
+      value: formatHourlyDifference(
+        hourlyLeader.hourlyValue - current.hourlyValue,
+      ),
+      tone: "blue",
+    },
+    {
+      id: "occupied",
+      label: `${hourlyLeader.title} 年度占用`,
+      value: `${occupiedDelta >= 0 ? "少" : "多"}${Math.abs(
+        Math.round(occupiedDelta),
+      )}小时`,
+      tone: "amber",
+    },
+  ];
 }
 
 Page({
   data: {
     empty: false,
     headline: "",
+    summaryTitle: "",
     resultCards: [],
-    annualRows: [],
-    hourlyRows: [],
+    comparisonTitle: "两方对比",
+    comparisonRows: [],
+    insightRows: [],
     breakEven: null,
-    feedbackOptions: [],
-    selectedFeedback: "",
-    receiptStatus: "",
-    isCopying: false,
+    hasBreakEven: false,
   },
 
   onLoad() {
@@ -66,44 +93,58 @@ Page({
 
     const results = payload.jobs.map(calculateJob);
     const analysis = analyzeResults(results);
-    const current = analysis.current;
-    const annualMaximum = Math.max(...results.map((item) => item.guaranteedAnnual));
-    const hourlyMaximum = Math.max(...results.map((item) => item.hourlyValue));
-    const metrics = getMetrics();
-
     const resultCards = results.map((item) => ({
       ...item,
-      color: optionColor(item.id),
       annualText: formatWan(item.guaranteedAnnual),
       hourlyText: formatMoney(item.hourlyValue),
       workHoursText: formatHours(item.totalHours),
       commuteHoursText: formatHours(item.annualCommuteHours),
-      annualDelta:
-        item.id === "current"
-          ? "当前基准"
-          : `年收入 ${formatDelta(item.guaranteedAnnual, current.guaranteedAnnual)}`,
-      hourlyDelta:
-        item.id === "current"
-          ? ""
-          : `有效时薪 ${formatDelta(item.hourlyValue, current.hourlyValue)}`,
       annualLeader: analysis.annualLeaders.some((leader) => leader.id === item.id),
       hourlyLeader: analysis.hourlyLeaders.some((leader) => leader.id === item.id),
     }));
 
-    const annualRows = results.map((item) => ({
-      id: item.id,
-      title: item.title,
-      color: optionColor(item.id),
-      valueText: formatWan(item.guaranteedAnnual),
-      width: barWidth(item.guaranteedAnnual, annualMaximum),
-    }));
-    const hourlyRows = results.map((item) => ({
-      id: item.id,
-      title: item.title,
-      color: optionColor(item.id),
-      valueText: `${Math.round(item.hourlyValue)}元`,
-      width: barWidth(item.hourlyValue, hourlyMaximum),
-    }));
+    const comparisonRows = [
+      {
+        metric: "annual",
+        label: "保证年收入",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: item.annualText,
+          highlighted: item.annualLeader,
+          a11yLabel: `${item.title}，保证年收入，${item.annualText}`,
+        })),
+      },
+      {
+        metric: "hourly",
+        label: "有效时薪",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: `${item.hourlyText}/时`,
+          highlighted: item.hourlyLeader,
+          a11yLabel: `${item.title}，有效时薪，${item.hourlyText}每小时`,
+        })),
+      },
+      {
+        metric: "occupied",
+        label: "年度占用",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: item.workHoursText,
+          highlighted: false,
+          a11yLabel: `${item.title}，年度占用，${item.workHoursText}`,
+        })),
+      },
+      {
+        metric: "commute",
+        label: "通勤",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: item.commuteHoursText,
+          highlighted: false,
+          a11yLabel: `${item.title}，年度通勤，${item.commuteHoursText}`,
+        })),
+      },
+    ];
 
     let breakEven = null;
     if (analysis.breakEven) {
@@ -119,18 +160,27 @@ Page({
     }
 
     this.analysis = analysis;
+    const annualLeaderText = analysis.annualLeaders
+      .map((item) => item.title)
+      .join(" / ");
+    const hourlyLeaderText = analysis.hourlyLeaders
+      .map((item) => item.title)
+      .join(" / ");
+    const summaryTitle =
+      annualLeaderText === hourlyLeaderText
+        ? `${annualLeaderText}，收入和时间回报都领先`
+        : `${annualLeaderText} 收入更高，${hourlyLeaderText} 时间回报更高`;
+
     this.setData({
       empty: false,
       headline: analysis.headline,
+      summaryTitle,
       resultCards,
-      annualRows,
-      hourlyRows,
+      comparisonTitle: `${results.length === 3 ? "三方" : "两方"}对比`,
+      comparisonRows,
+      insightRows: createInsightRows(analysis),
       breakEven,
-      selectedFeedback: metrics.feedback || "",
-      feedbackOptions: FEEDBACK_OPTIONS.map((label) => ({
-        label,
-        selected: metrics.feedback === label,
-      })),
+      hasBreakEven: Boolean(breakEven),
     });
   },
 
@@ -140,57 +190,24 @@ Page({
     else wx.reLaunch({ url: "/pages/calculator/calculator" });
   },
 
+  openBreakEven() {
+    if (!this.data.hasBreakEven) {
+      wx.showToast({ title: "当前结果没有可计算的反超条件", icon: "none" });
+      return;
+    }
+    wx.navigateTo({ url: "/pages/breakeven/breakeven" });
+  },
+
   backToCalculator() {
     wx.reLaunch({ url: "/pages/calculator/calculator" });
-  },
-
-  selectFeedback(event) {
-    const value = event.currentTarget.dataset.value;
-    updateMetrics({ feedback: value });
-    this.setData({
-      selectedFeedback: value,
-      receiptStatus: "",
-      feedbackOptions: FEEDBACK_OPTIONS.map((label) => ({
-        label,
-        selected: label === value,
-      })),
-    });
-  },
-
-  copyReceipt() {
-    if (this.data.isCopying || !this.data.selectedFeedback) return;
-    const metrics = getMetrics();
-    const elapsedMinutes = Math.max(
-      1,
-      Math.round((Date.now() - metrics.startedAt) / 60000),
-    );
-    const receipt = [
-      `真涨薪匿名验证回执 ${metrics.sessionId}`,
-      `完成用时：约 ${elapsedMinutes} 分钟`,
-      `计算次数：${metrics.calculations}`,
-      `分享结果：${metrics.shares > 0 ? "是" : "否"}`,
-      `下一步：${this.data.selectedFeedback}`,
-    ].join("\n");
-
-    this.setData({ isCopying: true, receiptStatus: "正在复制回执…" });
-    wx.setClipboardData({
-      data: receipt,
-      success: () => {
-        this.setData({ receiptStatus: "匿名验证回执已复制" });
-      },
-      fail: () => {
-        this.setData({ receiptStatus: "复制失败，请检查剪贴板权限后重试" });
-      },
-      complete: () => this.setData({ isCopying: false }),
-    });
   },
 
   clearLocalData() {
     wx.showModal({
       title: "清除本机数据？",
-      content: "会删除输入草稿、结果和匿名验证记录。",
+      content: "会删除输入草稿和最近一次计算结果。",
       confirmText: "清除数据",
-      confirmColor: "#8D2618",
+      confirmColor: "#A12F39",
       cancelText: "保留数据",
       success: ({ confirm }) => {
         if (!confirm) return;

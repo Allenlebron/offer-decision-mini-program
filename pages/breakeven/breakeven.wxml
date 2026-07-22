@@ -1,0 +1,103 @@
+<view class="page-shell breakeven-page">
+  <view wx:if="{{empty}}" class="empty-state">
+    <text class="empty-kicker">暂无反超条件</text>
+    <view class="empty-title" role="heading" aria-level="1">当前数据无法形成明确临界点</view>
+    <text class="empty-copy">返回结果页检查各项数据，或修改原始条件后重新计算。</text>
+    <button class="primary-button" bindtap="backToResult" hover-class="primary-button-active">返回结果</button>
+  </view>
+
+  <block wx:else>
+    <view class="breakeven-content">
+      <text class="page-description">把不确定的谈判条件，换成清楚的临界点。</text>
+
+      <view class="scenario-switcher" aria-label="选择要比较的两份工作">
+        <button
+          wx:for="{{scenarios}}"
+          wx:key="id"
+          wx:for-item="scenario"
+          class="scenario-tab {{scenario.selected ? 'scenario-tab-selected' : ''}}"
+          data-index="{{scenario.index}}"
+          bindtap="switchScenario"
+          hover-class="scenario-tab-active"
+          aria-pressed="{{scenario.selected ? 'true' : 'false'}}"
+        ><text class="scenario-tab-label">{{scenario.label}}</text></button>
+      </view>
+
+      <view wx:if="{{activeScenario}}" class="target-card">
+        <text class="target-card-title">{{activeScenario.title}}</text>
+        <view class="target-grid">
+          <view class="target-cell">
+            <text class="target-label">保证奖金至少增加</text>
+            <text class="target-value mono-data">{{activeScenario.extraBonusText}}</text>
+          </view>
+          <view class="target-or" aria-hidden="true">或</view>
+          <view class="target-cell">
+            <text class="target-label">每周工时至少减少</text>
+            <text class="target-value mono-data">{{activeScenario.hoursReductionText}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="simulation-section">
+        <text class="section-title">试着调整条件</text>
+        <view class="simulation-card">
+          <view class="slider-block">
+            <view class="slider-heading">
+              <text>{{activeScenario.challengerJob.title}} 保证奖金</text>
+              <text class="slider-value mono-data">{{draftBonusText}}个月</text>
+            </view>
+            <slider
+              min="{{activeScenario.bonusMin}}"
+              max="{{activeScenario.bonusMax}}"
+              step="0.1"
+              value="{{draftBonusValue}}"
+              activeColor="#2463FF"
+              backgroundColor="#29405F"
+              block-color="#FFFFFF"
+              block-size="24"
+              bindchanging="changeBonus"
+              bindchange="changeBonus"
+              aria-label="调整保证奖金月数"
+            />
+            <view class="slider-range mono-data">
+              <text>{{activeScenario.bonusMin}}个月</text>
+              <text>{{activeScenario.bonusMax}}个月</text>
+            </view>
+          </view>
+
+          <view class="slider-block">
+            <view class="slider-heading">
+              <text>每周实际工作</text>
+              <text class="slider-value mono-data">{{draftWeeklyHoursText}}小时/周</text>
+            </view>
+            <slider
+              min="{{activeScenario.hoursMin}}"
+              max="{{activeScenario.hoursMax}}"
+              step="0.5"
+              value="{{draftWeeklyHours}}"
+              activeColor="#2463FF"
+              backgroundColor="#29405F"
+              block-color="#FFFFFF"
+              block-size="24"
+              bindchanging="changeWeeklyHours"
+              bindchange="changeWeeklyHours"
+              aria-label="调整每周实际工作小时"
+            />
+            <view class="slider-range mono-data">
+              <text>{{activeScenario.hoursMin}}小时</text>
+              <text>{{activeScenario.hoursMax}}小时</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="simulation-status {{caughtUp ? 'simulation-status-success' : ''}}" role="status" aria-live="polite">
+        <text>{{statusText}}</text>
+        <text class="status-delta">{{statusDelta}}</text>
+      </view>
+
+      <button class="reset-button" bindtap="resetScenario" hover-class="reset-button-active">恢复原值</button>
+      <text class="simulation-note">只改变假设，不改原始数据。</text>
+    </view>
+  </block>
+</view>

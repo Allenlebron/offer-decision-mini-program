@@ -1,13 +1,14 @@
 {
   "pages": [
     "pages/calculator/calculator",
-    "pages/result/result"
+    "pages/result/result",
+    "pages/breakeven/breakeven"
   ],
   "window": {
     "navigationBarTitleText": "真涨薪",
-    "navigationBarBackgroundColor": "#F5F6F2",
-    "navigationBarTextStyle": "black",
-    "backgroundColor": "#F5F6F2",
+    "navigationBarBackgroundColor": "#061426",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F4F7FC",
     "backgroundTextStyle": "dark"
   },
   "style": "v2",

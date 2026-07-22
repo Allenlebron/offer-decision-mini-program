@@ -1,22 +1,44 @@
 <view class="page-shell calculator-page">
-  <view class="intro-panel">
-    <view class="brand-row">
-      <view class="brand-lockup" aria-label="真涨薪">
-        <view class="brand-mark" aria-hidden="true">真</view>
-        <text class="brand-name">真涨薪</text>
-      </view>
-      <view class="privacy-badge">本地计算 · 不上传薪资</view>
+  <view class="page-toolbar">
+    <view class="local-badge" aria-label="薪资数据保存在本机，不会上传">
+      <text>本机保存 · 不上传</text>
     </view>
+    <button class="example-button" bindtap="fillExample" hover-class="text-button-active">填入示例</button>
+  </view>
 
-    <view class="intro-copy">
-      <text class="step-label">第 1 步 · 输入条件</text>
-      <view class="page-title" role="heading" aria-level="1">
-        <text>把账面条件</text>
-        <text>摆在一起</text>
-      </view>
-      <text class="page-lead">每份工作只填 5 项。我们会把发薪月数、保证奖金、工作和通勤时间放在同一张账上。</text>
-      <button class="text-button" bindtap="fillExample" hover-class="text-button-active" aria-label="填入完整示例数据">填入示例看看</button>
-    </view>
+  <view class="job-switcher" aria-label="切换工作选项">
+    <button
+      wx:for="{{viewJobs}}"
+      wx:key="id"
+      wx:for-item="job"
+      class="job-tab {{job.selected ? 'job-tab-selected' : ''}}"
+      data-index="{{job.index}}"
+      bindtap="switchJob"
+      hover-class="job-tab-active"
+      aria-pressed="{{job.selected ? 'true' : 'false'}}"
+    >
+      <text>{{job.title}}</text>
+      <text wx:if="{{job.isComplete}}" class="job-tab-check" aria-label="已填写">✓</text>
+      <text wx:else class="job-tab-count mono-data">{{job.filledCount}}/5</text>
+    </button>
+    <button
+      wx:if="{{!hasOfferB}}"
+      class="job-tab add-job-tab"
+      bindtap="addOfferB"
+      hover-class="job-tab-active"
+      aria-label="添加 Offer B"
+    >+ Offer B</button>
+  </view>
+
+  <view wx:if="{{activeJob}}" class="entry-note">
+    <view class="info-mark" aria-hidden="true">i</view>
+    <text>{{activeJob.id === 'current' ? '只填确定会拿到的钱，按实际时间估算。' : activeDescription}}</text>
+    <button
+      wx:if="{{activeJob.id === 'offerB'}}"
+      class="remove-button"
+      bindtap="removeOfferB"
+      hover-class="remove-button-active"
+    >移除</button>
   </view>
 
   <view wx:if="{{generalError}}" class="form-alert" role="alert" aria-live="assertive">
@@ -24,63 +46,145 @@
     <text>{{generalError}}</text>
   </view>
 
-  <view class="jobs-list">
-    <view
-      wx:for="{{viewJobs}}"
-      wx:key="id"
-      wx:for-item="job"
-      class="job-panel job-{{job.id}}"
-      aria-labelledby="job-title-{{job.id}}"
-    >
-      <view class="job-header">
-        <view class="job-title-group">
-          <text class="job-index mono-data">{{job.displayIndex}}</text>
-          <text id="job-title-{{job.id}}" class="job-title">{{job.title}}</text>
-        </view>
-        <button
-          wx:if="{{job.id === 'offerB'}}"
-          class="remove-button"
-          bindtap="removeOfferB"
-          hover-class="remove-button-active"
-          aria-label="移除 Offer B，可在 5 秒内撤销"
-        >移除</button>
+  <view wx:if="{{activeJob}}" class="form-workspace" aria-label="{{activeJob.title}}">
+    <view class="field-group">
+      <view class="group-title">
+        <text>固定收入</text>
       </view>
-
-      <view class="field-list">
+      <view class="field-card">
         <view
-          wx:for="{{job.fields}}"
+          wx:for="{{activeIncomeFields}}"
           wx:key="key"
           wx:for-item="field"
-          id="field-{{job.id}}-{{field.key}}"
-          class="field-block {{field.error ? 'field-block-error' : ''}}"
+          id="field-{{activeJob.id}}-{{field.key}}"
+          class="field-row {{field.error ? 'field-row-error' : ''}}"
         >
           <view class="field-main">
-            <label class="field-label" for="input-{{job.id}}-{{field.key}}">{{field.label}}</label>
-            <view class="input-wrap">
+            <view class="field-copy">
+              <label class="field-label" for="input-{{activeJob.id}}-{{field.key}}">{{field.label}}</label>
+              <text class="field-hint">{{field.hint}}</text>
+            </view>
+            <view class="field-control">
+              <text wx:if="{{field.key === 'monthlySalary' && field.value}}" class="field-prefix">¥</text>
               <input
-                id="input-{{job.id}}-{{field.key}}"
+                id="input-{{activeJob.id}}-{{field.key}}"
                 class="field-input mono-data"
                 type="digit"
                 inputmode="decimal"
                 value="{{field.value}}"
                 placeholder="{{field.placeholder}}"
-                placeholder-style="color:#415149"
+                placeholder-style="color:#66748A;font-weight:500"
                 maxlength="16"
-                cursor-spacing="128"
-                data-job-id="{{job.id}}"
+                cursor-spacing="250"
+                data-job-id="{{activeJob.id}}"
                 data-key="{{field.key}}"
                 bindinput="onInput"
                 bindblur="onBlur"
-                aria-label="{{job.title}}{{field.label}}，单位{{field.suffix}}"
+                aria-label="{{activeJob.title}}{{field.label}}，单位{{field.suffix}}"
                 aria-invalid="{{field.error ? 'true' : 'false'}}"
-                aria-describedby="{{field.error ? 'error-' + job.id + '-' + field.key : ''}}"
+                aria-describedby="{{field.error ? 'error-' + activeJob.id + '-' + field.key : ''}}"
               />
-              <text class="field-suffix">{{field.suffix}}</text>
+              <text wx:if="{{field.key !== 'monthlySalary'}}" class="field-suffix">{{field.suffix}}</text>
+              <button
+                wx:if="{{field.value}}"
+                class="clear-field-button"
+                data-job-id="{{activeJob.id}}"
+                data-key="{{field.key}}"
+                bindtap="clearField"
+                hover-class="clear-field-button-active"
+                aria-label="清除{{field.label}}"
+              >×</button>
             </view>
+          </view>
+          <view wx:if="{{field.presets.length}}" class="preset-list" role="group" aria-label="{{field.label}}快捷选项">
+            <button
+              wx:for="{{field.presets}}"
+              wx:key="value"
+              wx:for-item="preset"
+              class="preset-button {{preset.selected ? 'preset-button-selected' : ''}}"
+              data-job-id="{{activeJob.id}}"
+              data-key="{{field.key}}"
+              data-value="{{preset.value}}"
+              bindtap="selectPreset"
+              hover-class="preset-button-active"
+              aria-pressed="{{preset.selected ? 'true' : 'false'}}"
+            >{{preset.value}}</button>
           </view>
           <text
             wx:if="{{field.error}}"
-            id="error-{{job.id}}-{{field.key}}"
+            id="error-{{activeJob.id}}-{{field.key}}"
+            class="field-error"
+            role="alert"
+          >{{field.error}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="field-group">
+      <view class="group-title">
+        <text>时间成本</text>
+      </view>
+      <view class="field-card">
+        <view
+          wx:for="{{activeTimeFields}}"
+          wx:key="key"
+          wx:for-item="field"
+          id="field-{{activeJob.id}}-{{field.key}}"
+          class="field-row {{field.error ? 'field-row-error' : ''}}"
+        >
+          <view class="field-main">
+            <view class="field-copy">
+              <label class="field-label" for="input-{{activeJob.id}}-{{field.key}}">{{field.label}}</label>
+              <text class="field-hint">{{field.hint}}</text>
+            </view>
+            <view class="field-control">
+              <input
+                id="input-{{activeJob.id}}-{{field.key}}"
+                class="field-input mono-data"
+                type="digit"
+                inputmode="decimal"
+                value="{{field.value}}"
+                placeholder="{{field.placeholder}}"
+                placeholder-style="color:#66748A;font-weight:500"
+                maxlength="16"
+                cursor-spacing="250"
+                data-job-id="{{activeJob.id}}"
+                data-key="{{field.key}}"
+                bindinput="onInput"
+                bindblur="onBlur"
+                aria-label="{{activeJob.title}}{{field.label}}，单位{{field.suffix}}"
+                aria-invalid="{{field.error ? 'true' : 'false'}}"
+                aria-describedby="{{field.error ? 'error-' + activeJob.id + '-' + field.key : ''}}"
+              />
+              <text class="field-suffix">{{field.suffix}}</text>
+              <button
+                wx:if="{{field.value}}"
+                class="clear-field-button"
+                data-job-id="{{activeJob.id}}"
+                data-key="{{field.key}}"
+                bindtap="clearField"
+                hover-class="clear-field-button-active"
+                aria-label="清除{{field.label}}"
+              >×</button>
+            </view>
+          </view>
+          <view class="preset-list" role="group" aria-label="{{field.label}}快捷选项">
+            <button
+              wx:for="{{field.presets}}"
+              wx:key="value"
+              wx:for-item="preset"
+              class="preset-button {{preset.selected ? 'preset-button-selected' : ''}}"
+              data-job-id="{{activeJob.id}}"
+              data-key="{{field.key}}"
+              data-value="{{preset.value}}"
+              bindtap="selectPreset"
+              hover-class="preset-button-active"
+              aria-pressed="{{preset.selected ? 'true' : 'false'}}"
+            >{{preset.value}}</button>
+          </view>
+          <text
+            wx:if="{{field.error}}"
+            id="error-{{activeJob.id}}-{{field.key}}"
             class="field-error"
             role="alert"
           >{{field.error}}</text>
@@ -94,50 +198,52 @@
     <button class="undo-button" bindtap="undoRemoveOffer" hover-class="undo-button-active">撤销</button>
   </view>
 
-  <button
-    wx:if="{{!hasOfferB}}"
-    class="add-offer-button"
-    bindtap="addOfferB"
-    hover-class="add-offer-button-active"
-  >＋ 添加 Offer B</button>
-
-  <view class="input-note">
-    <text class="input-note-title">怎么填固定收入？</text>
-    <text>例如 13 薪、另有 1 个月保证奖金，分别填写 13 和 1；没有保证奖金或通勤时填写 0。</text>
+  <view class="guide-section">
+    <button
+      class="guide-toggle"
+      bindtap="toggleGuide"
+      hover-class="guide-toggle-active"
+      aria-expanded="{{showGuide ? 'true' : 'false'}}"
+    >
+      <text>查看计算口径</text>
+      <text aria-hidden="true">{{showGuide ? '−' : '＋'}}</text>
+    </button>
+    <view wx:if="{{showGuide}}" class="guide-content">
+      <text>保证年收入 = 月薪 ×（固定发薪月数 + 保证奖金月数）。</text>
+      <text>有效时薪按每年工作 48 周、通勤 240 天并计入往返时间估算。</text>
+    </view>
   </view>
-
-  <view class="assumptions" aria-label="计算口径">
-    <view class="assumptions-header">
-      <text class="assumptions-title">计算口径</text>
-      <text class="assumptions-tag">税前估算</text>
-    </view>
-    <view class="assumption-row">
-      <text>每年工作</text>
-      <text class="mono-data">48 周</text>
-    </view>
-    <view class="assumption-row">
-      <text>每年通勤</text>
-      <text class="mono-data">240 天 · 往返</text>
-    </view>
-    <text class="assumption-help">暂不计个税、五险一金、试用期折扣、浮动奖金、股票和期权。</text>
-  </view>
-
-  <button class="clear-button" bindtap="clearLocalData" hover-class="clear-button-active">清除本机数据</button>
+  <button class="clear-data-button" bindtap="clearLocalData" hover-class="clear-data-button-active">清除本机数据</button>
 
   <view class="submit-bar">
     <view class="submit-bar-inner">
-      <view class="submit-summary">
-        <text class="submit-count mono-data">{{optionCount}} 个选项</text>
-        <text>草稿自动保存在本机</text>
+      <view class="preview-card" aria-label="{{activeJob.title}}实时估算">
+        <view class="preview-item">
+          <text class="preview-label">年收入</text>
+          <text class="preview-value mono-data">{{activePreview.annualText}}</text>
+        </view>
+        <view class="preview-divider" aria-hidden="true"></view>
+        <view class="preview-item">
+          <text class="preview-label">有效时薪</text>
+          <text class="preview-value mono-data">{{activePreview.hourlyText}}</text>
+        </view>
       </view>
-      <button
-        class="submit-button"
-        bindtap="calculate"
-        hover-class="submit-button-active"
-        loading="{{isSubmitting}}"
-        disabled="{{isSubmitting}}"
-        aria-busy="{{isSubmitting ? 'true' : 'false'}}"
-      >{{isSubmitting ? '正在计算' : '算清真实涨幅'}}<text wx:if="{{!isSubmitting}}" aria-hidden="true">→</text></button>
+      <view class="submit-actions">
+        <button
+          wx:if="{{activeJobIndex > 0}}"
+          class="back-step-button"
+          bindtap="previousJob"
+          hover-class="back-step-button-active"
+        >上一步</button>
+        <button
+          class="submit-button"
+          bindtap="advance"
+          hover-class="submit-button-active"
+          loading="{{isSubmitting}}"
+          disabled="{{isSubmitting}}"
+          aria-busy="{{isSubmitting ? 'true' : 'false'}}"
+        >{{isSubmitting ? '正在计算' : primaryActionText}}</button>
+      </view>
     </view>
   </view>
 </view>

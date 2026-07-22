@@ -8,7 +8,6 @@ function createMetrics() {
     startedAt: Date.now(),
     calculations: 0,
     shares: 0,
-    feedback: "",
   };
 }
 

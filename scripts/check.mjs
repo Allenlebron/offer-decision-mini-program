@@ -10,9 +10,13 @@ const projectConfig = JSON.parse(
 
 assert.equal(projectConfig.compileType, "miniprogram");
 assert.equal(projectConfig.miniprogramRoot, "./");
+assert.deepEqual(projectConfig.packOptions?.ignore, [
+  { type: "folder", value: "assets" },
+]);
 assert.deepEqual(appConfig.pages, [
   "pages/calculator/calculator",
   "pages/result/result",
+  "pages/breakeven/breakeven",
 ]);
 
 for (const page of appConfig.pages) {
@@ -25,6 +29,7 @@ for (const page of appConfig.pages) {
 const sourceFiles = [
   "pages/calculator/calculator.js",
   "pages/result/result.js",
+  "pages/breakeven/breakeven.js",
   "utils/offer-analysis.js",
   "utils/offer-validation.js",
 ];
@@ -40,5 +45,15 @@ const calculatorTemplate = readFileSync(
 );
 assert.match(calculatorTemplate, /aria-label=/);
 assert.match(calculatorTemplate, /field-error/);
+
+const breakEvenTemplate = readFileSync(
+  join(root, "pages/breakeven/breakeven.wxml"),
+  "utf8",
+);
+assert.match(breakEvenTemplate, /<slider/);
+assert.match(breakEvenTemplate, /bindchanging="changeBonus"/);
+assert.match(breakEvenTemplate, /bindchanging="changeWeeklyHours"/);
+assert.doesNotMatch(breakEvenTemplate, /bindtap="recalculateScenario"/);
+assert.match(breakEvenTemplate, /只改变假设，不改原始数据/);
 
 console.log("Mini program structure check passed.");
