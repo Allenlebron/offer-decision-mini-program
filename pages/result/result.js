@@ -24,6 +24,20 @@ function formatHourlyDifference(value) {
   return `${value >= 0 ? "+" : "−"}${rounded}/时`;
 }
 
+function formatOptionalMoney(value) {
+  return value === null ? "未填" : formatMoney(value);
+}
+
+function formatOptionalRate(value) {
+  if (value === null) return "未填";
+  return `${Number.isInteger(value) ? value : value.toFixed(1)}%`;
+}
+
+function formatOptionalAnnual(value) {
+  if (value === null) return "未计算";
+  return value >= 10000 ? formatWan(value) : formatMoney(value);
+}
+
 function createInsightRows(analysis) {
   const current = analysis.current;
   const annualLeader = analysis.annualLeaders[0];
@@ -33,15 +47,15 @@ function createInsightRows(analysis) {
   return [
     {
       id: "annual",
-      label: `${annualLeader.title} 年收入`,
+      label: `${annualLeader.title} 综合价值`,
       value: formatWanDifference(
-        annualLeader.guaranteedAnnual - current.guaranteedAnnual,
+        annualLeader.totalAnnualValue - current.totalAnnualValue,
       ),
       tone: "blue",
     },
     {
       id: "hourly",
-      label: `${hourlyLeader.title} 有效时薪`,
+      label: `${hourlyLeader.title} 综合时薪`,
       value: formatHourlyDifference(
         hourlyLeader.hourlyValue - current.hourlyValue,
       ),
@@ -66,6 +80,8 @@ Page({
     resultCards: [],
     comparisonTitle: "两方对比",
     comparisonRows: [],
+    benefitRows: [],
+    hasBenefits: false,
     insightRows: [],
     breakEven: null,
     hasBreakEven: false,
@@ -97,10 +113,19 @@ Page({
     const analysis = analyzeResults(results);
     const resultCards = results.map((item) => ({
       ...item,
-      annualText: formatWan(item.guaranteedAnnual),
+      totalAnnualValueText: formatWan(item.totalAnnualValue),
+      guaranteedAnnualText: formatWan(item.guaranteedAnnual),
       hourlyText: formatMoney(item.hourlyValue),
       workHoursText: formatHours(item.totalHours),
       commuteHoursText: formatHours(item.annualCommuteHours),
+      socialInsuranceBaseText: formatOptionalMoney(item.socialInsuranceBase),
+      housingFundBaseText: formatOptionalMoney(item.housingFundBase),
+      employerHousingFundRateText: formatOptionalRate(
+        item.employerHousingFundRate,
+      ),
+      employerHousingFundAnnualText: formatOptionalAnnual(
+        item.employerHousingFundAnnual,
+      ),
       annualLeader: analysis.annualLeaders.some((leader) => leader.id === item.id),
       hourlyLeader: analysis.hourlyLeaders.some((leader) => leader.id === item.id),
     }));
@@ -108,22 +133,32 @@ Page({
     const comparisonRows = [
       {
         metric: "annual",
-        label: "保证年收入",
+        label: "年综合价值",
         cells: resultCards.map((item) => ({
           id: item.id,
-          value: item.annualText,
+          value: item.totalAnnualValueText,
           highlighted: item.annualLeader,
-          a11yLabel: `${item.title}，保证年收入，${item.annualText}`,
+          a11yLabel: `${item.title}，年综合价值，${item.totalAnnualValueText}`,
+        })),
+      },
+      {
+        metric: "cash",
+        label: "税前保证收入",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: item.guaranteedAnnualText,
+          highlighted: false,
+          a11yLabel: `${item.title}，税前保证收入，${item.guaranteedAnnualText}`,
         })),
       },
       {
         metric: "hourly",
-        label: "有效时薪",
+        label: "综合时薪",
         cells: resultCards.map((item) => ({
           id: item.id,
           value: `${item.hourlyText}/时`,
           highlighted: item.hourlyLeader,
-          a11yLabel: `${item.title}，有效时薪，${item.hourlyText}每小时`,
+          a11yLabel: `${item.title}，综合时薪，${item.hourlyText}每小时`,
         })),
       },
       {
@@ -144,6 +179,44 @@ Page({
           value: item.commuteHoursText,
           highlighted: false,
           a11yLabel: `${item.title}，年度通勤，${item.commuteHoursText}`,
+        })),
+      },
+    ];
+    const benefitRows = [
+      {
+        metric: "social-insurance-base",
+        label: "五险基数",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: item.socialInsuranceBaseText,
+          a11yLabel: `${item.title}，五险缴费基数，${item.socialInsuranceBaseText}`,
+        })),
+      },
+      {
+        metric: "housing-fund-base",
+        label: "公积金基数",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: item.housingFundBaseText,
+          a11yLabel: `${item.title}，公积金缴存基数，${item.housingFundBaseText}`,
+        })),
+      },
+      {
+        metric: "housing-fund-rate",
+        label: "公司比例",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: item.employerHousingFundRateText,
+          a11yLabel: `${item.title}，公司公积金比例，${item.employerHousingFundRateText}`,
+        })),
+      },
+      {
+        metric: "housing-fund-annual",
+        label: "公司年缴",
+        cells: resultCards.map((item) => ({
+          id: item.id,
+          value: item.employerHousingFundAnnualText,
+          a11yLabel: `${item.title}，公司公积金年缴存，${item.employerHousingFundAnnualText}`,
         })),
       },
     ];
@@ -170,8 +243,8 @@ Page({
       .join(" / ");
     const summaryTitle =
       annualLeaderText === hourlyLeaderText
-        ? `${annualLeaderText}，收入和时间回报都领先`
-        : `${annualLeaderText} 收入更高，${hourlyLeaderText} 时间回报更高`;
+        ? `${annualLeaderText}，综合价值和时间回报都领先`
+        : `${annualLeaderText} 综合价值更高，${hourlyLeaderText} 时间回报更高`;
 
     this.setData({
       empty: false,
@@ -180,6 +253,8 @@ Page({
       resultCards,
       comparisonTitle: `${results.length === 3 ? "三方" : "两方"}对比`,
       comparisonRows,
+      benefitRows,
+      hasBenefits: resultCards.some((item) => item.hasBenefitData),
       insightRows: createInsightRows(analysis),
       breakEven,
       hasBreakEven: Boolean(breakEven),

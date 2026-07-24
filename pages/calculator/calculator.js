@@ -1,5 +1,6 @@
 const {
   FIELDS,
+  BENEFIT_FIELDS,
   BLANK_JOBS,
   BLANK_OFFER_B,
   EXAMPLE_JOBS,
@@ -21,31 +22,44 @@ const {
 } = require("../../utils/storage");
 const { buildSharePath, enableShareMenu } = require("../../utils/share");
 
+const ALL_FIELDS = [...FIELDS, ...BENEFIT_FIELDS];
+const BENEFIT_FIELD_KEYS = new Set(BENEFIT_FIELDS.map((field) => field.key));
+
 const FIELD_PRESENTATION = {
   monthlySalary: {
     hint: "每月固定收入",
     placeholder: "输入金额",
-    presets: [],
   },
   salaryMonths: {
     hint: "常见 12、13 或 14 薪",
     placeholder: "手动填写",
-    presets: ["12", "13", "14", "16"],
   },
   guaranteedBonusMonths: {
     hint: "只填确定发放的部分",
     placeholder: "手动填写",
-    presets: ["0", "1", "2", "3"],
   },
   weeklyHours: {
     hint: "按实际工时估算",
     placeholder: "手动填写",
-    presets: ["40", "45", "50", "60"],
   },
   commuteMinutes: {
     hint: "单程；远程办公选 0",
     placeholder: "手动填写",
-    presets: ["0", "30", "45", "60"],
+  },
+  socialInsuranceBase: {
+    hint: "每月 · 按公司实际申报",
+    placeholder: "可留空",
+    money: true,
+  },
+  housingFundBase: {
+    hint: "每月 · 按公司实际申报",
+    placeholder: "可留空",
+    money: true,
+  },
+  employerHousingFundRate: {
+    hint: "只填公司缴存比例",
+    placeholder: "可留空",
+    money: false,
   },
 };
 
@@ -78,14 +92,19 @@ function createViewJobs(jobs, fieldErrors, activeJobIndex) {
       (field) => !validateField(job[field.key], field),
     ),
     filledCount: FIELDS.filter((field) => String(job[field.key]).trim()).length,
+    benefitFilledCount: BENEFIT_FIELDS.filter((field) =>
+      String(job[field.key]).trim(),
+    ).length,
     fields: FIELDS.map((field) => ({
       ...field,
       ...FIELD_PRESENTATION[field.key],
       value: job[field.key],
-      presets: FIELD_PRESENTATION[field.key].presets.map((value) => ({
-        value,
-        selected: job[field.key] === value,
-      })),
+      error: fieldErrors[`${job.id}-${field.key}`] || "",
+    })),
+    benefitFields: BENEFIT_FIELDS.map((field) => ({
+      ...field,
+      ...FIELD_PRESENTATION[field.key],
+      value: job[field.key],
       error: fieldErrors[`${job.id}-${field.key}`] || "",
     })),
   }));
@@ -106,7 +125,7 @@ function createPreview(job) {
   const result = calculateJob(job);
   return {
     ready: true,
-    annualText: `¥${formatWan(result.guaranteedAnnual)}`,
+    annualText: `¥${formatWan(result.totalAnnualValue)}`,
     hourlyText: `${formatMoney(result.hourlyValue)}/时`,
   };
 }
@@ -127,6 +146,8 @@ Page({
     activeJob: null,
     activeIncomeFields: [],
     activeTimeFields: [],
+    activeBenefitFields: [],
+    activeBenefitFilledCount: 0,
     activePreview: {
       ready: false,
       annualText: "—",
@@ -144,6 +165,7 @@ Page({
     undoOfferVisible: false,
     isSubmitting: false,
     showGuide: false,
+    showBenefits: false,
   },
 
   onLoad() {
@@ -181,6 +203,8 @@ Page({
       activeJob,
       activeIncomeFields: activeJob.fields.slice(0, 3),
       activeTimeFields: activeJob.fields.slice(3),
+      activeBenefitFields: activeJob.benefitFields,
+      activeBenefitFilledCount: activeJob.benefitFilledCount,
       activePreview,
       activeHeading: copy.heading,
       activeDescription: copy.description,
@@ -215,17 +239,6 @@ Page({
     this.syncJobs(jobs, fieldErrors);
   },
 
-  selectPreset(event) {
-    const { jobId, key, value } = event.currentTarget.dataset;
-    const jobs = this.data.jobs.map((job) =>
-      job.id === jobId ? { ...job, [key]: String(value) } : job,
-    );
-    const fieldErrors = { ...this.data.fieldErrors };
-    delete fieldErrors[`${jobId}-${key}`];
-    this.setData({ generalError: "" });
-    this.syncJobs(jobs, fieldErrors);
-  },
-
   clearField(event) {
     const { jobId, key } = event.currentTarget.dataset;
     const jobs = this.data.jobs.map((job) =>
@@ -250,8 +263,8 @@ Page({
     if (!job) return false;
 
     const fieldErrors = { ...this.data.fieldErrors };
-    FIELDS.forEach((field) => delete fieldErrors[`${job.id}-${field.key}`]);
-    FIELDS.forEach((field) => {
+    ALL_FIELDS.forEach((field) => delete fieldErrors[`${job.id}-${field.key}`]);
+    ALL_FIELDS.forEach((field) => {
       const message = validateField(job[field.key], field);
       if (message) fieldErrors[`${job.id}-${field.key}`] = message;
     });
@@ -261,7 +274,12 @@ Page({
     );
     if (!invalidFieldId) return true;
 
-    this.setData({ generalError: `先完成${job.title}的必填项。` });
+    const invalidKey = invalidFieldId.slice(job.id.length + 1);
+    this.setData({
+      generalError: `先检查${job.title}的输入。`,
+      showBenefits:
+        this.data.showBenefits || BENEFIT_FIELD_KEYS.has(invalidKey),
+    });
     this.syncJobs(this.data.jobs, fieldErrors, false);
     scrollToField(`#field-${invalidFieldId}`);
     return false;
@@ -296,9 +314,13 @@ Page({
     this.setData({ showGuide: !this.data.showGuide });
   },
 
+  toggleBenefits() {
+    this.setData({ showBenefits: !this.data.showBenefits });
+  },
+
   onBlur(event) {
     const { jobId, key } = event.currentTarget.dataset;
-    const field = FIELDS.find((item) => item.key === key);
+    const field = ALL_FIELDS.find((item) => item.key === key);
     if (!field) return;
 
     const fieldErrors = { ...this.data.fieldErrors };
@@ -321,7 +343,7 @@ Page({
 
   fillExample() {
     const hasInput = this.data.jobs.some((job) =>
-      FIELDS.some((field) => String(job[field.key]).trim()),
+      ALL_FIELDS.some((field) => String(job[field.key]).trim()),
     );
     if (!hasInput) {
       this.applyExample();
@@ -407,6 +429,11 @@ Page({
       this.setData({
         activeJobIndex: Math.max(0, activeJobIndex),
         generalError: `还有 ${invalidFieldIds.length} 项需要检查，已在对应字段下标出。`,
+        showBenefits:
+          this.data.showBenefits ||
+          invalidFieldIds.some((id) =>
+            BENEFIT_FIELD_KEYS.has(id.slice(id.indexOf("-") + 1)),
+          ),
       });
       this.syncJobs(this.data.jobs, fieldErrors, false);
       scrollToField(`#field-${invalidFieldIds[0]}`);
@@ -459,6 +486,7 @@ Page({
           removedOffer: null,
           undoOfferVisible: false,
           showGuide: false,
+          showBenefits: false,
         });
         this.syncJobs(cloneJobs(BLANK_JOBS), {}, false);
         updateMetrics({});

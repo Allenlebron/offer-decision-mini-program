@@ -15,6 +15,10 @@ function shortJobTitle(job) {
   }[job.id] || job.title;
 }
 
+function formatMinimum(value) {
+  return (Math.ceil(value * 10) / 10).toFixed(1);
+}
+
 function buildScenario(leftJob, rightJob, index) {
   const rawJobs = [leftJob, rightJob];
   const results = rawJobs.map(calculateJob);
@@ -39,11 +43,11 @@ function buildScenario(leftJob, rightJob, index) {
     title: `${challenger.title} 要追平 ${winner.title}`,
     winner,
     challengerJob: { ...challengerJob },
-    extraBonusText: `+${extraBonusMonths.toFixed(1)}个月`,
+    extraBonusText: `+${formatMinimum(extraBonusMonths)}个月`,
     hoursReductionText:
       weeklyHoursReduction === null
         ? "仅靠工时无法追平"
-        : `−${weeklyHoursReduction.toFixed(1)}小时`,
+        : `−${formatMinimum(weeklyHoursReduction)}小时`,
     originalBonus,
     originalWeeklyHours,
     bonusMin: 0,

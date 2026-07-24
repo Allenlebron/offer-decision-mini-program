@@ -15,7 +15,7 @@
         </view>
         <text class="result-kicker">{{comparisonTitle}}</text>
         <view class="result-title" role="heading" aria-level="1">{{summaryTitle}}</view>
-        <text class="result-note">保证收入与时间回报按同一口径计算。</text>
+        <text class="result-note">综合价值包含税前保证收入和公司公积金年缴。</text>
       </view>
 
       <view class="comparison-table result-count-{{resultCards.length}}" aria-label="{{comparisonTitle}}数据表">
@@ -28,7 +28,7 @@
             class="table-data-cell table-header-cell column-{{card.id}}"
           >
             <text class="column-title">{{card.title}}</text>
-            <text wx:if="{{card.annualLeader}}" class="leader-tag leader-tag-annual">收入领先</text>
+            <text wx:if="{{card.annualLeader}}" class="leader-tag leader-tag-annual">价值领先</text>
             <text wx:if="{{card.hourlyLeader}}" class="leader-tag leader-tag-hourly">时薪领先</text>
           </view>
         </view>
@@ -47,6 +47,39 @@
             class="table-data-cell mono-data column-{{cell.id}} {{cell.highlighted ? 'table-value-leading' : ''}}"
             aria-label="{{cell.a11yLabel}}"
           >{{cell.value}}</view>
+        </view>
+      </view>
+
+      <view wx:if="{{hasBenefits}}" class="benefit-comparison-section">
+        <text class="section-title">五险一金</text>
+        <text class="benefit-note">基数和比例填写完整后，公司公积金年缴会计入综合价值和综合时薪。</text>
+        <view class="comparison-table benefit-comparison-table result-count-{{resultCards.length}}" aria-label="{{comparisonTitle}}五险一金数据表">
+          <view class="table-row table-header-row benefit-header-row">
+            <view class="table-label-cell"></view>
+            <view
+              wx:for="{{resultCards}}"
+              wx:key="id"
+              wx:for-item="card"
+              class="table-data-cell table-header-cell column-{{card.id}}"
+            >
+              <text class="column-title">{{card.title}}</text>
+            </view>
+          </view>
+          <view
+            wx:for="{{benefitRows}}"
+            wx:key="metric"
+            wx:for-item="row"
+            class="table-row"
+          >
+            <view class="table-label-cell">{{row.label}}</view>
+            <view
+              wx:for="{{row.cells}}"
+              wx:key="id"
+              wx:for-item="cell"
+              class="table-data-cell mono-data column-{{cell.id}}"
+              aria-label="{{cell.a11yLabel}}"
+            >{{cell.value}}</view>
+          </view>
         </view>
       </view>
 
@@ -71,8 +104,8 @@
       </button>
 
       <view class="result-footer">
-        <text>按 48 个工作周、240 个通勤日和税前收入估算。</text>
-        <text>未计个税、五险一金及浮动收入。</text>
+        <text>综合价值 = 税前保证收入 + 公司公积金年缴。</text>
+        <text>按 48 个工作周和 240 个通勤日估算；未计个税、个人扣款、公司五险及浮动收入。</text>
         <button class="clear-button" bindtap="clearLocalData" hover-class="clear-button-active">清除本机数据</button>
       </view>
     </view>

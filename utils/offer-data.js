@@ -46,6 +46,45 @@ const FIELDS = [
   },
 ];
 
+const BENEFIT_FIELDS = [
+  {
+    key: "socialInsuranceBase",
+    label: "五险缴费基数",
+    suffix: "元",
+    placeholder: "可留空",
+    min: 0,
+    max: 10000000,
+    optional: true,
+    invalidMessage: "请填写 0–10,000,000 元",
+  },
+  {
+    key: "housingFundBase",
+    label: "公积金缴存基数",
+    suffix: "元",
+    placeholder: "可留空",
+    min: 0,
+    max: 10000000,
+    optional: true,
+    invalidMessage: "请填写 0–10,000,000 元",
+  },
+  {
+    key: "employerHousingFundRate",
+    label: "公司公积金比例",
+    suffix: "%",
+    placeholder: "可留空",
+    min: 0,
+    max: 100,
+    optional: true,
+    invalidMessage: "请填写 0–100%",
+  },
+];
+
+const EMPTY_BENEFITS = {
+  socialInsuranceBase: "",
+  housingFundBase: "",
+  employerHousingFundRate: "",
+};
+
 const BLANK_JOBS = [
   {
     id: "current",
@@ -55,6 +94,7 @@ const BLANK_JOBS = [
     guaranteedBonusMonths: "",
     weeklyHours: "",
     commuteMinutes: "",
+    ...EMPTY_BENEFITS,
   },
   {
     id: "offerA",
@@ -64,6 +104,7 @@ const BLANK_JOBS = [
     guaranteedBonusMonths: "",
     weeklyHours: "",
     commuteMinutes: "",
+    ...EMPTY_BENEFITS,
   },
 ];
 
@@ -75,6 +116,7 @@ const BLANK_OFFER_B = {
   guaranteedBonusMonths: "",
   weeklyHours: "",
   commuteMinutes: "",
+  ...EMPTY_BENEFITS,
 };
 
 const EXAMPLE_JOBS = [
@@ -86,6 +128,9 @@ const EXAMPLE_JOBS = [
     guaranteedBonusMonths: "1",
     weeklyHours: "45",
     commuteMinutes: "45",
+    socialInsuranceBase: "25000",
+    housingFundBase: "25000",
+    employerHousingFundRate: "12",
   },
   {
     id: "offerA",
@@ -95,6 +140,9 @@ const EXAMPLE_JOBS = [
     guaranteedBonusMonths: "0",
     weeklyHours: "55",
     commuteMinutes: "70",
+    socialInsuranceBase: "32000",
+    housingFundBase: "32000",
+    employerHousingFundRate: "7",
   },
   {
     id: "offerB",
@@ -104,15 +152,19 @@ const EXAMPLE_JOBS = [
     guaranteedBonusMonths: "2",
     weeklyHours: "42",
     commuteMinutes: "30",
+    socialInsuranceBase: "20000",
+    housingFundBase: "20000",
+    employerHousingFundRate: "12",
   },
 ];
 
 function cloneJobs(jobs) {
-  return jobs.map((job) => ({ ...job }));
+  return jobs.map((job) => ({ ...EMPTY_BENEFITS, ...job }));
 }
 
 module.exports = {
   FIELDS,
+  BENEFIT_FIELDS,
   BLANK_JOBS,
   BLANK_OFFER_B,
   EXAMPLE_JOBS,

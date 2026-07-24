@@ -148,6 +148,26 @@
   color: var(--accent-secondary);
 }
 
+.benefit-comparison-section {
+  margin-top: 22px;
+}
+
+.benefit-note {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-muted-dark);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.benefit-comparison-table {
+  margin-top: 9px;
+}
+
+.benefit-header-row {
+  min-height: 54px;
+}
+
 .insight-section {
   margin-top: 22px;
 }

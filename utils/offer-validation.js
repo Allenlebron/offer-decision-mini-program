@@ -1,6 +1,9 @@
-const { FIELDS } = require("./offer-data");
+const { FIELDS, BENEFIT_FIELDS } = require("./offer-data");
+
+const ALL_FIELDS = [...FIELDS, ...BENEFIT_FIELDS];
 
 function validateField(value, field) {
+  if (field.optional && String(value ?? "").trim() === "") return "";
   const parsed = Number.parseFloat(value);
   if (!Number.isFinite(parsed) || parsed < field.min || parsed > field.max) {
     return field.invalidMessage;
@@ -11,7 +14,7 @@ function validateField(value, field) {
 function validateJobs(jobs) {
   const errors = {};
   jobs.forEach((job) => {
-    FIELDS.forEach((field) => {
+    ALL_FIELDS.forEach((field) => {
       const message = validateField(job[field.key], field);
       if (message) errors[`${job.id}-${field.key}`] = message;
     });
@@ -25,7 +28,11 @@ function isSupportedJob(job) {
     job &&
     supportedIds.includes(job.id) &&
     typeof job.title === "string" &&
-    FIELDS.every((field) => typeof job[field.key] === "string")
+    FIELDS.every((field) => typeof job[field.key] === "string") &&
+    BENEFIT_FIELDS.every(
+      (field) =>
+        job[field.key] === undefined || typeof job[field.key] === "string",
+    )
   );
 }
 

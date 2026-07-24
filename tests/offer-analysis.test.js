@@ -38,7 +38,7 @@ test("calculates the website example with the same result", () => {
   closeTo(offerB.hourlyValue, 192.82);
   assert.equal(
     analysis.headline,
-    "Offer A的税前保证年收入最高，Offer B的税前有效时薪最高。",
+    "Offer A的年综合价值最高，Offer B的综合时薪最高。",
   );
   closeTo(analysis.breakEven.extraBonusMonths, 5.28);
   closeTo(analysis.breakEven.weeklyHoursReduction, 18.26);
@@ -51,7 +51,7 @@ test("handles a current job winner and an impossible hours catch-up", () => {
 
   assert.equal(
     analysis.headline,
-    "当前工作在税前保证年收入和税前有效时薪上都领先。",
+    "当前工作在年综合价值和综合时薪上都领先。",
   );
   closeTo(analysis.breakEven.extraBonusMonths, 60);
   assert.equal(analysis.breakEven.weeklyHoursReduction, null);
@@ -64,7 +64,61 @@ test("does not invent a break-even target for ties", () => {
 
   assert.equal(
     analysis.headline,
-    "所有选项的税前保证年收入和税前有效时薪持平。",
+    "所有选项的年综合价值和综合时薪持平。",
   );
   assert.equal(analysis.breakEven, null);
+});
+
+test("includes employer housing fund in annual value and hourly value", () => {
+  const result = calculateJob({
+    id: "current",
+    title: "当前工作",
+    monthlySalary: "25000",
+    salaryMonths: "13",
+    guaranteedBonusMonths: "1",
+    weeklyHours: "45",
+    commuteMinutes: "45",
+    socialInsuranceBase: "25000",
+    housingFundBase: "25000",
+    employerHousingFundRate: "12",
+  });
+
+  assert.equal(result.guaranteedAnnual, 350000);
+  assert.equal(result.socialInsuranceBase, 25000);
+  assert.equal(result.housingFundBase, 25000);
+  assert.equal(result.employerHousingFundRate, 12);
+  assert.equal(result.employerHousingFundAnnual, 36000);
+  assert.equal(result.totalAnnualValue, 386000);
+  closeTo(result.hourlyValue, 153.17);
+  assert.equal(result.hasBenefitData, true);
+});
+
+test("uses annual value including housing fund to decide the leader", () => {
+  const current = calculateJob({
+    id: "current",
+    title: "当前工作",
+    monthlySalary: "25000",
+    salaryMonths: "13",
+    guaranteedBonusMonths: "1",
+    weeklyHours: "40",
+    commuteMinutes: "0",
+    housingFundBase: "25000",
+    employerHousingFundRate: "12",
+  });
+  const offerA = calculateJob({
+    id: "offerA",
+    title: "Offer A",
+    monthlySalary: "27000",
+    salaryMonths: "14",
+    guaranteedBonusMonths: "0",
+    weeklyHours: "40",
+    commuteMinutes: "0",
+  });
+  const analysis = analyzeResults([current, offerA]);
+
+  assert.equal(current.guaranteedAnnual, 350000);
+  assert.equal(offerA.guaranteedAnnual, 378000);
+  assert.equal(current.totalAnnualValue, 386000);
+  assert.equal(analysis.annualLeaders[0].id, "current");
+  assert.equal(analysis.hourlyLeaders[0].id, "current");
 });

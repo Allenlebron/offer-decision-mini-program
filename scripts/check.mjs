@@ -46,6 +46,10 @@ const calculatorTemplate = readFileSync(
 );
 assert.match(calculatorTemplate, /aria-label=/);
 assert.match(calculatorTemplate, /field-error/);
+assert.match(calculatorTemplate, /field-input-salary/);
+assert.match(calculatorTemplate, /五险一金/);
+assert.match(calculatorTemplate, /toggleBenefits/);
+assert.doesNotMatch(calculatorTemplate, /preset-list|selectPreset/);
 
 const resultTemplate = readFileSync(
   join(root, "pages/result/result.wxml"),
@@ -53,6 +57,7 @@ const resultTemplate = readFileSync(
 );
 assert.match(resultTemplate, /open-type="share"/);
 assert.match(resultTemplate, /分享给朋友/);
+assert.match(resultTemplate, /公司公积金年缴会计入综合价值和综合时薪/);
 
 const breakEvenTemplate = readFileSync(
   join(root, "pages/breakeven/breakeven.wxml"),

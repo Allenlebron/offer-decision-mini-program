@@ -6,11 +6,28 @@ function toNumber(value) {
   return Number.parseFloat(value);
 }
 
+function toOptionalNumber(value) {
+  if (String(value ?? "").trim() === "") return null;
+  const parsed = toNumber(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function calculateJob(job) {
   const monthlySalary = toNumber(job.monthlySalary);
+  const socialInsuranceBase = toOptionalNumber(job.socialInsuranceBase);
+  const housingFundBase = toOptionalNumber(job.housingFundBase);
+  const employerHousingFundRate = toOptionalNumber(
+    job.employerHousingFundRate,
+  );
+  const employerHousingFundAnnual =
+    housingFundBase === null || employerHousingFundRate === null
+      ? null
+      : housingFundBase * (employerHousingFundRate / 100) * 12;
   const guaranteedAnnual =
     monthlySalary *
     (toNumber(job.salaryMonths) + toNumber(job.guaranteedBonusMonths));
+  const totalAnnualValue =
+    guaranteedAnnual + (employerHousingFundAnnual ?? 0);
   const annualWorkHours = toNumber(job.weeklyHours) * WORK_WEEKS;
   const annualCommuteHours =
     (toNumber(job.commuteMinutes) * 2 * COMMUTE_DAYS) / 60;
@@ -21,10 +38,19 @@ function calculateJob(job) {
     title: job.title,
     monthlySalary,
     guaranteedAnnual,
+    totalAnnualValue,
+    socialInsuranceBase,
+    housingFundBase,
+    employerHousingFundRate,
+    employerHousingFundAnnual,
+    hasBenefitData:
+      socialInsuranceBase !== null ||
+      housingFundBase !== null ||
+      employerHousingFundRate !== null,
     annualWorkHours,
     annualCommuteHours,
     totalHours,
-    hourlyValue: guaranteedAnnual / totalHours,
+    hourlyValue: totalAnnualValue / totalHours,
   };
 }
 
@@ -65,9 +91,9 @@ function calculateBreakEven(results) {
   const targetAnnual = winner.hourlyValue * challenger.totalHours;
   const extraBonusMonths = Math.max(
     0,
-    (targetAnnual - challenger.guaranteedAnnual) / challenger.monthlySalary,
+    (targetAnnual - challenger.totalAnnualValue) / challenger.monthlySalary,
   );
-  const targetTotalHours = challenger.guaranteedAnnual / winner.hourlyValue;
+  const targetTotalHours = challenger.totalAnnualValue / winner.hourlyValue;
   const canCatchUpByHours =
     targetTotalHours + TOLERANCE >= challenger.annualCommuteHours;
   const targetWeeklyHours = canCatchUpByHours
@@ -95,20 +121,20 @@ function analyzeResults(results) {
     results.find((result) => result.id === "current") || results[0];
   const annualLeaders = findLeaders(
     results,
-    (result) => result.guaranteedAnnual,
+    (result) => result.totalAnnualValue,
   );
   const hourlyLeaders = findLeaders(results, (result) => result.hourlyValue);
-  const annualSummary = summarizeLeaders(annualLeaders, "税前保证年收入");
-  const hourlySummary = summarizeLeaders(hourlyLeaders, "税前有效时薪");
+  const annualSummary = summarizeLeaders(annualLeaders, "年综合价值");
+  const hourlySummary = summarizeLeaders(hourlyLeaders, "综合时薪");
   let headline;
 
   if (sameLeaders(annualLeaders, hourlyLeaders)) {
     if (annualLeaders.length === results.length) {
-      headline = "所有选项的税前保证年收入和税前有效时薪持平。";
+      headline = "所有选项的年综合价值和综合时薪持平。";
     } else if (annualLeaders.length === 1) {
-      headline = `${annualLeaders[0].title}在税前保证年收入和税前有效时薪上都领先。`;
+      headline = `${annualLeaders[0].title}在年综合价值和综合时薪上都领先。`;
     } else {
-      headline = `${joinNames(annualLeaders)}在税前保证年收入和税前有效时薪上并列领先。`;
+      headline = `${joinNames(annualLeaders)}在年综合价值和综合时薪上并列领先。`;
     }
   } else {
     headline = `${annualSummary}，${hourlySummary}。`;

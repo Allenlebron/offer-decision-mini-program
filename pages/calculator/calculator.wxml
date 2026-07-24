@@ -68,7 +68,7 @@
               <text wx:if="{{field.key === 'monthlySalary' && field.value}}" class="field-prefix">¥</text>
               <input
                 id="input-{{activeJob.id}}-{{field.key}}"
-                class="field-input mono-data"
+                class="field-input mono-data {{field.key === 'monthlySalary' ? 'field-input-salary' : ''}}"
                 type="digit"
                 inputmode="decimal"
                 value="{{field.value}}"
@@ -95,20 +95,6 @@
                 aria-label="清除{{field.label}}"
               >×</button>
             </view>
-          </view>
-          <view wx:if="{{field.presets.length}}" class="preset-list" role="group" aria-label="{{field.label}}快捷选项">
-            <button
-              wx:for="{{field.presets}}"
-              wx:key="value"
-              wx:for-item="preset"
-              class="preset-button {{preset.selected ? 'preset-button-selected' : ''}}"
-              data-job-id="{{activeJob.id}}"
-              data-key="{{field.key}}"
-              data-value="{{preset.value}}"
-              bindtap="selectPreset"
-              hover-class="preset-button-active"
-              aria-pressed="{{preset.selected ? 'true' : 'false'}}"
-            >{{preset.value}}</button>
           </view>
           <text
             wx:if="{{field.error}}"
@@ -168,26 +154,85 @@
               >×</button>
             </view>
           </view>
-          <view class="preset-list" role="group" aria-label="{{field.label}}快捷选项">
-            <button
-              wx:for="{{field.presets}}"
-              wx:key="value"
-              wx:for-item="preset"
-              class="preset-button {{preset.selected ? 'preset-button-selected' : ''}}"
-              data-job-id="{{activeJob.id}}"
-              data-key="{{field.key}}"
-              data-value="{{preset.value}}"
-              bindtap="selectPreset"
-              hover-class="preset-button-active"
-              aria-pressed="{{preset.selected ? 'true' : 'false'}}"
-            >{{preset.value}}</button>
-          </view>
           <text
             wx:if="{{field.error}}"
             id="error-{{activeJob.id}}-{{field.key}}"
             class="field-error"
             role="alert"
           >{{field.error}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="field-group benefit-group">
+      <view class="benefit-section {{showBenefits ? 'benefit-section-open' : ''}}">
+        <view
+          class="benefit-toggle"
+          bindtap="toggleBenefits"
+          hover-class="benefit-toggle-active"
+          role="button"
+          tabindex="0"
+          aria-expanded="{{showBenefits ? 'true' : 'false'}}"
+        >
+          <text class="benefit-title">五险一金</text>
+          <view class="benefit-toggle-meta">
+            <text class="benefit-state">{{activeBenefitFilledCount ? '已填 ' + activeBenefitFilledCount + ' 项' : '可选'}}</text>
+            <text class="benefit-chevron {{showBenefits ? 'benefit-chevron-open' : ''}}" aria-hidden="true">›</text>
+          </view>
+        </view>
+
+        <view wx:if="{{showBenefits}}" class="benefit-content">
+          <text class="benefit-copy">公司公积金计入综合价值，不算税前现金</text>
+          <view
+            wx:for="{{activeBenefitFields}}"
+            wx:key="key"
+            wx:for-item="field"
+            id="field-{{activeJob.id}}-{{field.key}}"
+            class="field-row {{field.error ? 'field-row-error' : ''}}"
+          >
+            <view class="field-main">
+              <view class="field-copy">
+                <label class="field-label" for="input-{{activeJob.id}}-{{field.key}}">{{field.label}}</label>
+                <text class="field-hint">{{field.hint}}</text>
+              </view>
+              <view class="field-control">
+                <input
+                  id="input-{{activeJob.id}}-{{field.key}}"
+                  class="field-input mono-data {{field.money ? 'field-input-money' : ''}}"
+                  type="digit"
+                  inputmode="decimal"
+                  value="{{field.value}}"
+                  placeholder="{{field.placeholder}}"
+                  placeholder-style="color:#66748A;font-weight:500"
+                  maxlength="16"
+                  cursor-spacing="250"
+                  data-job-id="{{activeJob.id}}"
+                  data-key="{{field.key}}"
+                  bindinput="onInput"
+                  bindblur="onBlur"
+                  aria-label="{{activeJob.title}}{{field.label}}，单位{{field.suffix}}"
+                  aria-invalid="{{field.error ? 'true' : 'false'}}"
+                  aria-describedby="{{field.error ? 'error-' + activeJob.id + '-' + field.key : ''}}"
+                />
+                <text class="field-suffix">{{field.suffix}}</text>
+                <button
+                  wx:if="{{field.value}}"
+                  class="clear-field-button"
+                  data-job-id="{{activeJob.id}}"
+                  data-key="{{field.key}}"
+                  bindtap="clearField"
+                  hover-class="clear-field-button-active"
+                  aria-label="清除{{field.label}}"
+                >×</button>
+              </view>
+            </view>
+            <text
+              wx:if="{{field.error}}"
+              id="error-{{activeJob.id}}-{{field.key}}"
+              class="field-error"
+              role="alert"
+            >{{field.error}}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -210,7 +255,9 @@
     </button>
     <view wx:if="{{showGuide}}" class="guide-content">
       <text>保证年收入 = 月薪 ×（固定发薪月数 + 保证奖金月数）。</text>
-      <text>有效时薪按每年工作 48 周、通勤 240 天并计入往返时间估算。</text>
+      <text>年综合价值 = 保证年收入 + 公司公积金年缴存。</text>
+      <text>综合时薪按每年工作 48 周、通勤 240 天并计入往返时间估算。</text>
+      <text>公司公积金年缴存 = 缴存基数 × 公司比例 × 12；公司五险暂不折算金额。</text>
     </view>
   </view>
   <button class="clear-data-button" bindtap="clearLocalData" hover-class="clear-data-button-active">清除本机数据</button>
@@ -219,12 +266,12 @@
     <view class="submit-bar-inner">
       <view class="preview-card" aria-label="{{activeJob.title}}实时估算">
         <view class="preview-item">
-          <text class="preview-label">年收入</text>
+          <text class="preview-label">综合价值</text>
           <text class="preview-value mono-data">{{activePreview.annualText}}</text>
         </view>
         <view class="preview-divider" aria-hidden="true"></view>
         <view class="preview-item">
-          <text class="preview-label">有效时薪</text>
+          <text class="preview-label">综合时薪</text>
           <text class="preview-value mono-data">{{activePreview.hourlyText}}</text>
         </view>
       </view>

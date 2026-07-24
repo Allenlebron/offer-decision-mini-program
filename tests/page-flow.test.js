@@ -101,6 +101,7 @@ test("runs the real calculator and result page flow", () => {
   calculator.fillExample();
   assert.equal(calculator.data.jobs.length, 3);
   assert.equal(calculator.data.jobs[1].monthlySalary, "32000");
+  assert.equal(calculator.data.activeBenefitFilledCount, 3);
   assert.deepEqual(harness.storage.get(DRAFT_KEY), calculator.data.jobs);
 
   calculator.calculate();
@@ -112,19 +113,25 @@ test("runs the real calculator and result page flow", () => {
   result.onLoad();
   assert.equal(result.data.empty, false);
   assert.equal(result.data.resultCards.length, 3);
+  assert.equal(result.data.hasBenefits, true);
+  assert.equal(result.data.benefitRows[3].cells[0].value, "3.6万");
   assert.equal(
     result.data.headline,
-    "Offer A的税前保证年收入最高，Offer B的税前有效时薪最高。",
+    "Offer A的年综合价值最高，Offer B的综合时薪最高。",
   );
   assert.equal(result.data.breakEven.extraBonusMonths, "5.3");
-  assert.equal(result.data.breakEven.weeklyHoursReduction, "18.3");
+  assert.equal(result.data.breakEven.weeklyHoursReduction, "13.4");
   assert.equal(
     result.data.summaryTitle,
-    "Offer A 收入更高，Offer B 时间回报更高",
+    "Offer A 综合价值更高，Offer B 时间回报更高",
   );
   assert.equal(
     result.data.comparisonRows[0].cells[1].a11yLabel,
-    "Offer A，保证年收入，44.8万",
+    "Offer A，年综合价值，47.5万",
+  );
+  assert.equal(
+    result.data.comparisonRows[1].cells[1].a11yLabel,
+    "Offer A，税前保证收入，44.8万",
   );
 
   result.openBreakEven();
@@ -147,10 +154,10 @@ test("runs the real calculator and result page flow", () => {
   );
   breakEven.switchScenario({ currentTarget: { dataset: { index: 2 } } });
   assert.equal(breakEven.data.activeScenario.title, "Offer A 要追平 Offer B");
-  assert.equal(breakEven.data.activeScenario.extraBonusText, "+5.3个月");
-  assert.equal(breakEven.data.activeScenario.hoursReductionText, "−18.3小时");
+  assert.equal(breakEven.data.activeScenario.extraBonusText, "+5.8个月");
+  assert.equal(breakEven.data.activeScenario.hoursReductionText, "−18.6小时");
 
-  breakEven.changeBonus({ detail: { value: 5.3 } });
+  breakEven.changeBonus({ detail: { value: 5.8 } });
   assert.equal(breakEven.data.caughtUp, true);
   assert.equal(breakEven.data.statusText, "已经追平");
   assert.equal(harness.storage.get(RESULT_KEY).jobs[1].guaranteedBonusMonths, "0");
@@ -175,7 +182,7 @@ test("runs the real calculator and result page flow", () => {
   ]);
 });
 
-test("guides users through one job at a time and supports quick values", () => {
+test("guides users through one job at a time with direct numeric input", () => {
   const harness = createWxHarness();
   const calculator = loadPage(
     "../pages/calculator/calculator.js",
@@ -189,21 +196,25 @@ test("guides users through one job at a time and supports quick values", () => {
   calculator.advance();
   assert.equal(calculator.data.activeJobIndex, 0);
   assert.equal(Object.keys(calculator.data.fieldErrors).length, 5);
-  assert.match(calculator.data.generalError, /先完成当前工作/);
+  assert.match(calculator.data.generalError, /先检查当前工作的输入/);
 
   calculator.fillExample();
+  calculator.toggleBenefits();
+  assert.equal(calculator.data.showBenefits, true);
+  assert.equal(calculator.data.activeBenefitFields.length, 3);
   calculator.advance();
   assert.equal(calculator.data.activeJob.id, "offerA");
   assert.equal(calculator.data.primaryActionText, "下一份：Offer B");
 
   calculator.switchJob({ currentTarget: { dataset: { index: 2 } } });
-  calculator.selectPreset({
+  calculator.onInput({
     currentTarget: {
-      dataset: { jobId: "offerB", key: "commuteMinutes", value: "60" },
+      dataset: { jobId: "offerB", key: "commuteMinutes" },
     },
+    detail: { value: "60" },
   });
   assert.equal(calculator.data.jobs[2].commuteMinutes, "60");
-  assert.equal(calculator.data.activeJob.fields[4].presets[3].selected, true);
+  assert.equal(calculator.data.activeJob.fields[4].value, "60");
 
   calculator.clearField({
     currentTarget: {
@@ -211,14 +222,43 @@ test("guides users through one job at a time and supports quick values", () => {
     },
   });
   assert.equal(calculator.data.jobs[2].commuteMinutes, "");
-  calculator.selectPreset({
+  calculator.onInput({
     currentTarget: {
-      dataset: { jobId: "offerB", key: "commuteMinutes", value: "60" },
+      dataset: { jobId: "offerB", key: "commuteMinutes" },
     },
+    detail: { value: "60" },
   });
 
   calculator.advance();
   assert.deepEqual(harness.calls.navigateTo, ["/pages/result/result"]);
+});
+
+test("keeps benefit fields optional and expands them when entered values are invalid", () => {
+  const harness = createWxHarness();
+  const calculator = loadPage(
+    "../pages/calculator/calculator.js",
+    harness.wx,
+  );
+
+  calculator.onLoad();
+  calculator.fillExample();
+  calculator.onInput({
+    currentTarget: {
+      dataset: {
+        jobId: "current",
+        key: "employerHousingFundRate",
+      },
+    },
+    detail: { value: "101" },
+  });
+  calculator.calculate();
+
+  assert.equal(calculator.data.showBenefits, true);
+  assert.equal(
+    calculator.data.fieldErrors["current-employerHousingFundRate"],
+    "请填写 0–100%",
+  );
+  assert.equal(harness.calls.navigateTo.length, 0);
 });
 
 test("blocks an incomplete calculation and points to the first field", () => {

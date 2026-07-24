@@ -14,7 +14,6 @@
 .entry-note,
 .field-main,
 .field-control,
-.preset-list,
 .group-title,
 .undo-banner,
 .guide-toggle,
@@ -95,7 +94,6 @@
 }
 
 .job-tab-active,
-.preset-button-active,
 .submit-button-active,
 .back-step-button-active {
   transform: scale(0.985);
@@ -246,6 +244,14 @@
   text-align: right;
 }
 
+.field-input-salary {
+  width: 104px;
+}
+
+.field-input-money {
+  width: 96px;
+}
+
 .field-input:focus {
   color: var(--accent-strong);
 }
@@ -270,34 +276,6 @@
   color: var(--accent);
 }
 
-.preset-list {
-  flex-wrap: nowrap;
-  gap: 4px;
-  padding-top: 7px;
-}
-
-.preset-button {
-  width: 0;
-  min-width: 0;
-  min-height: 44px;
-  flex: 1 1 0;
-  padding: 0;
-  margin: 0;
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  background: var(--surface-light);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 44px;
-}
-
-.preset-button-selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-}
-
 .field-error {
   display: block;
   margin-top: 6px;
@@ -312,6 +290,87 @@
 
 .field-row-error .field-input {
   color: var(--danger);
+}
+
+.benefit-section {
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--surface-raised);
+}
+
+.benefit-toggle {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  margin: 0;
+  background: transparent;
+  color: var(--text-primary);
+  line-height: 1.2;
+  text-align: left;
+}
+
+.benefit-section-open .benefit-toggle {
+  border-bottom: 1px solid var(--surface-muted);
+}
+
+.benefit-toggle-active {
+  background: var(--surface-light);
+}
+
+.benefit-copy {
+  display: block;
+}
+
+.benefit-title {
+  display: block;
+  min-width: 0;
+  flex: 1;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.benefit-copy {
+  padding: 9px 12px;
+  background: var(--surface-light);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.benefit-toggle-meta {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.benefit-state {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.benefit-chevron {
+  width: 24px;
+  color: var(--text-secondary);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  transform: rotate(0deg);
+}
+
+.benefit-chevron-open {
+  transform: rotate(90deg);
 }
 
 .undo-banner {
@@ -501,6 +560,27 @@
 
   .field-input {
     width: 64px;
+  }
+
+  .field-input-salary {
+    width: 96px;
+  }
+
+  .field-input-money {
+    width: 84px;
+  }
+
+  .benefit-content .field-copy {
+    min-width: 96px;
+  }
+
+  .benefit-content .field-label {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .benefit-toggle {
+    gap: 8px;
   }
 
   .job-tab {
