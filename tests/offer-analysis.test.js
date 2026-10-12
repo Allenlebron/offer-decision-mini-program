@@ -69,6 +69,17 @@ test("does not invent a break-even target for ties", () => {
   assert.equal(analysis.breakEven, null);
 });
 
+test("keeps the trailing option catch-up target when two leaders tie", () => {
+  const current = job("current", "当前工作", 25000, 12, 0, 40, 0);
+  const offerA = job("offerA", "Offer A", 25000, 12, 0, 40, 0);
+  const offerB = job("offerB", "Offer B", 20000, 12, 0, 40, 0);
+  const analysis = analyzeResults([current, offerA, offerB]);
+  assert.equal(analysis.hourlyLeaders.length, 2);
+  assert.ok(analysis.breakEven);
+  assert.equal(analysis.breakEven.challenger.id, "offerB");
+  closeTo(analysis.breakEven.extraBonusMonths, 3);
+});
+
 test("includes employer housing fund in annual value and hourly value", () => {
   const result = calculateJob({
     id: "current",
@@ -121,4 +132,24 @@ test("uses annual value including housing fund to decide the leader", () => {
   assert.equal(current.totalAnnualValue, 386000);
   assert.equal(analysis.annualLeaders[0].id, "current");
   assert.equal(analysis.hourlyLeaders[0].id, "current");
+});
+
+test("PRD AC-01 exact example and AC-02 distinguish missing from zero housing fund", () => {
+  const values = {
+    id: "current", title: "当前工作", monthlySalary: "25000", salaryMonths: "13",
+    guaranteedBonusMonths: "1", weeklyHours: "45", commuteMinutes: "45",
+    housingFundBase: "25000", employerHousingFundRate: "8",
+  };
+  const result = calculateJob(values);
+  assert.equal(result.guaranteedAnnual, 350000);
+  assert.equal(result.employerHousingFundAnnual, 24000);
+  assert.equal(result.totalAnnualValue, 374000);
+  assert.equal(result.totalHours, 2520);
+  assert.equal(result.hourlyValue.toFixed(2), "148.41");
+  const missing = calculateJob({ ...values, id: "offerA", housingFundBase: "" });
+  const explicitZero = calculateJob({ ...values, id: "offerA", employerHousingFundRate: "0" });
+  assert.equal(missing.employerHousingFundAnnual, null);
+  assert.equal(explicitZero.employerHousingFundAnnual, 0);
+  assert.equal(analyzeResults([result, missing]).hasMissingHousingFund, true);
+  assert.equal(analyzeResults([result, explicitZero]).hasMissingHousingFund, false);
 });

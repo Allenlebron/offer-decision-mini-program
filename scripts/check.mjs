@@ -10,10 +10,15 @@ const projectConfig = JSON.parse(
 
 assert.equal(projectConfig.compileType, "miniprogram");
 assert.equal(projectConfig.miniprogramRoot, "./");
-assert.deepEqual(projectConfig.packOptions?.ignore, [
-  { type: "folder", value: "assets" },
-]);
+for (const folder of ["assets", "docs", "tests", "scripts", "writing-workspace", "image-cards", "node_modules"]) {
+  assert.ok(projectConfig.packOptions?.ignore.some((item) => item.type === "folder" && item.value === folder));
+}
+readFileSync(join(root, "images/share-entry.png"));
 assert.deepEqual(appConfig.pages, [
+  "pages/home/home",
+  "pages/decision/decision",
+  "pages/decision-result/decision-result",
+  "pages/about/about",
   "pages/calculator/calculator",
   "pages/result/result",
   "pages/breakeven/breakeven",
@@ -27,6 +32,7 @@ for (const page of appConfig.pages) {
 }
 
 const sourceFiles = [
+  ...appConfig.pages.map((page) => `${page}.js`),
   "pages/calculator/calculator.js",
   "pages/result/result.js",
   "pages/breakeven/breakeven.js",
@@ -44,6 +50,12 @@ const calculatorTemplate = readFileSync(
   join(root, "pages/calculator/calculator.wxml"),
   "utf8",
 );
+const homeTemplate = readFileSync(join(root, "pages/home/home.wxml"), "utf8");
+assert.match(homeTemplate, /class="offer-entry"/);
+assert.match(homeTemplate, /data-id="offer"/);
+assert.match(homeTemplate, /租房与通勤/);
+assert.match(homeTemplate, /空窗期预算/);
+assert.doesNotMatch(homeTemplate, /<br\s*\//);
 assert.match(calculatorTemplate, /aria-label=/);
 assert.match(calculatorTemplate, /field-error/);
 assert.match(calculatorTemplate, /field-input-salary/);

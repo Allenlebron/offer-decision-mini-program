@@ -1,25 +1,25 @@
 const { calculateJob, analyzeResults } = require("../../utils/offer-analysis");
-const { validateJobs, isValidDraft } = require("../../utils/offer-validation");
 const {
   formatMoney,
   formatWan,
   formatHours,
 } = require("../../utils/format");
 const {
-  DRAFT_KEY,
-  RESULT_KEY,
-  METRICS_KEY,
   getMetrics,
   updateMetrics,
 } = require("../../utils/storage");
-const { buildSharePath, enableShareMenu } = require("../../utils/share");
+const { buildSharePath, enableShareMenu, OFFER_SHARE_TITLE, SHARE_IMAGE } = require("../../utils/share");
+const { loadOfferResult } = require("../../utils/offer-session");
+const { clearAllData } = require("../../utils/decision-storage");
 
 function formatWanDifference(value) {
   const prefix = value >= 0 ? "+" : "−";
+  if (Math.abs(value) < 1000) return `${prefix}${Math.abs(value).toLocaleString("en-US", { maximumFractionDigits: 2 })}元`;
   return `${prefix}${(Math.abs(value) / 10000).toFixed(1)}万`;
 }
 
 function formatHourlyDifference(value) {
+  if (Math.abs(value) < 1 && value !== 0) return `${value >= 0 ? "+" : "−"}不足1元/时`;
   const rounded = Math.round(Math.abs(value));
   return `${value >= 0 ? "+" : "−"}${rounded}/时`;
 }
@@ -34,7 +34,7 @@ function formatOptionalRate(value) {
 }
 
 function formatOptionalAnnual(value) {
-  if (value === null) return "未计算";
+  if (value === null) return "未计入";
   return value >= 10000 ? formatWan(value) : formatMoney(value);
 }
 
@@ -44,16 +44,19 @@ function createInsightRows(analysis) {
   const hourlyLeader = analysis.hourlyLeaders[0];
   const occupiedDelta = current.totalHours - hourlyLeader.totalHours;
 
-  return [
-    {
+  const rows = [];
+  if (annualLeader.id !== current.id) {
+    rows.push({
       id: "annual",
       label: `${annualLeader.title} 综合价值`,
       value: formatWanDifference(
         annualLeader.totalAnnualValue - current.totalAnnualValue,
       ),
       tone: "blue",
-    },
-    {
+    });
+  }
+  if (hourlyLeader.id !== current.id) {
+    rows.push({
       id: "hourly",
       label: `${hourlyLeader.title} 综合时薪`,
       value: formatHourlyDifference(
@@ -64,12 +67,11 @@ function createInsightRows(analysis) {
     {
       id: "occupied",
       label: `${hourlyLeader.title} 年度占用`,
-      value: `${occupiedDelta >= 0 ? "少" : "多"}${Math.abs(
-        Math.round(occupiedDelta),
-      )}小时`,
+      value: occupiedDelta === 0 ? "与当前相同" : `${occupiedDelta > 0 ? "少" : "多"}${Math.abs(occupiedDelta) < 1 ? "不足1" : Math.abs(Math.round(occupiedDelta))}小时`,
       tone: "amber",
-    },
-  ];
+    });
+  }
+  return rows;
 }
 
 Page({
@@ -85,26 +87,22 @@ Page({
     insightRows: [],
     breakEven: null,
     hasBreakEven: false,
+    storageNotice: "",
   },
 
-  onLoad() {
+  onLoad(options = {}) {
+    if (options.source === "timeline_result") { wx.redirectTo({ url: "/pages/calculator/calculator" }); return; }
     enableShareMenu();
     this.loadResult();
   },
 
-  loadResult() {
-    let payload;
-    try {
-      payload = wx.getStorageSync(RESULT_KEY);
-    } catch (_error) {
-      payload = null;
-    }
+  onShow() {
+    this.loadResult();
+  },
 
-    if (
-      !payload ||
-      !isValidDraft(payload.jobs) ||
-      Object.keys(validateJobs(payload.jobs)).length > 0
-    ) {
+  loadResult() {
+    const payload = loadOfferResult();
+    if (!payload) {
       this.setData({ empty: true });
       return;
     }
@@ -128,6 +126,8 @@ Page({
       ),
       annualLeader: analysis.annualLeaders.some((leader) => leader.id === item.id),
       hourlyLeader: analysis.hourlyLeaders.some((leader) => leader.id === item.id),
+      annualLeaderLabel: analysis.annualLeaders.length === results.length ? "价值持平" : analysis.annualLeaders.length > 1 ? "价值并列" : "价值领先",
+      hourlyLeaderLabel: analysis.hourlyLeaders.length === results.length ? "时薪持平" : analysis.hourlyLeaders.length > 1 ? "时薪并列" : "时薪领先",
     }));
 
     const comparisonRows = [
@@ -241,13 +241,20 @@ Page({
     const hourlyLeaderText = analysis.hourlyLeaders
       .map((item) => item.title)
       .join(" / ");
-    const summaryTitle =
-      annualLeaderText === hourlyLeaderText
+    let summaryTitle =
+      analysis.annualLeaders.length === results.length && analysis.hourlyLeaders.length === results.length
+        ? "已填写项目的综合价值和综合时薪持平"
+        : annualLeaderText === hourlyLeaderText
         ? `${annualLeaderText}，综合价值和时间回报都领先`
         : `${annualLeaderText} 综合价值更高，${hourlyLeaderText} 时间回报更高`;
+    if (analysis.hasMissingHousingFund) {
+      summaryTitle = `按已填写项目比较：${summaryTitle}。部分公司公积金未计入。`;
+    }
 
     this.setData({
       empty: false,
+      isExample: Boolean(payload.example),
+      storageNotice: payload.saved === false ? "草稿与结果未保存完整，退出微信后可能无法恢复。" : "",
       headline: analysis.headline,
       summaryTitle,
       resultCards,
@@ -282,17 +289,13 @@ Page({
   clearLocalData() {
     wx.showModal({
       title: "清除本机数据？",
-      content: "会删除输入草稿和最近一次计算结果。",
+      content: "会删除 Offer、租房通勤、空窗期预算的本机草稿与结果。此操作无法撤销。",
       confirmText: "清除数据",
       confirmColor: "#A12F39",
       cancelText: "保留数据",
       success: ({ confirm }) => {
         if (!confirm) return;
-        try {
-          wx.removeStorageSync(DRAFT_KEY);
-          wx.removeStorageSync(RESULT_KEY);
-          wx.removeStorageSync(METRICS_KEY);
-        } catch (_error) {
+        if (!clearAllData()) {
           wx.showToast({ title: "数据未完全清除，请重试", icon: "none" });
           return;
         }
@@ -305,15 +308,17 @@ Page({
     const metrics = getMetrics();
     updateMetrics({ shares: metrics.shares + 1 });
     return {
-      title: this.data.headline || "这次跳槽，真的涨薪了吗？",
+      title: OFFER_SHARE_TITLE,
       path: buildSharePath("result"),
+      imageUrl: SHARE_IMAGE,
     };
   },
 
   onShareTimeline() {
     return {
-      title: this.data.headline || "真涨薪｜Offer 真实价值对比",
+      title: "真涨薪｜Offer 真实价值对比",
       query: "source=timeline_result",
+      imageUrl: SHARE_IMAGE,
     };
   },
 });

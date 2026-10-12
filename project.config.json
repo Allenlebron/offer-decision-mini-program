@@ -9,7 +9,17 @@
       {
         "value": "assets",
         "type": "folder"
-      }
+      },
+      { "value": "docs", "type": "folder" },
+      { "value": "tests", "type": "folder" },
+      { "value": "scripts", "type": "folder" },
+      { "value": "writing-workspace", "type": "folder" },
+      { "value": "image-cards", "type": "folder" },
+      { "value": ".baoyu-skills", "type": "folder" },
+      { "value": ".impeccable", "type": "folder" },
+      { "value": ".git", "type": "folder" },
+      { "value": "node_modules", "type": "folder" },
+      { "value": ".md", "type": "suffix" }
     ],
     "include": []
   },

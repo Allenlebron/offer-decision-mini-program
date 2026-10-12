@@ -1,0 +1,16 @@
+@import "../../styles/decision.wxss";
+.form-page { padding-top: 8px; }
+.form-progress { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 16px; }
+.form-fields { background: var(--surface-raised); border: 1px solid var(--border-light); border-radius: 12px; }
+.decision-field { padding: 16px; }
+.decision-field + .decision-field { border-top: 1px solid var(--border-light); }
+.field-name { display: block; font-size: 16px; font-weight: 650; line-height: 1.5; }
+.decision-input-wrap { display: flex; align-items: center; margin-top: 8px; border: 1px solid var(--border-light); border-radius: 8px; padding: 0 12px; }
+.decision-input-wrap:focus-within { border-color: var(--accent); }
+.decision-input { flex: 1; width: 0; min-width: 0; height: 48px; font-size: 17px; }
+.input-unit { flex-shrink: 0; margin-left: 8px; color: var(--text-secondary); font-size: 14px; }
+.field-help { display: block; color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-top: 8px; }
+.input-invalid { border-color: var(--danger); background: var(--surface-error-soft); }
+.input-invalid + .field-help { color: var(--danger); }
+.form-actions { margin-top: 24px; }
+.form-footer { display: flex; justify-content: center; margin-top: 16px; gap: 8px; }

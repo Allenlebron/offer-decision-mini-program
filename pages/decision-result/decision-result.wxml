@@ -1,0 +1,33 @@
+<view class="result-dark">
+  <view class="decision-shell decision-result-page">
+    <view wx:if="{{empty}}">
+      <view class="decision-title">先填好条件，再看结果</view>
+      <view class="decision-muted decision-paragraph">没有可用的完整输入，不会用空值代替 0。</view>
+      <button class="decision-primary decision-section" bindtap="edit" hover-class="decision-pressed">开始填写</button>
+    </view>
+    <block wx:else>
+      <view class="decision-local">本机计算 · 不上传</view>
+      <view wx:if="{{isExample}}" class="decision-notice">当前包含示例数据，不代表你的实际情况。</view>
+      <view wx:if="{{storageNotice}}" class="decision-notice" role="status">{{storageNotice}}</view>
+      <view class="decision-title result-summary" role="heading" aria-level="1">{{result.summary}}</view>
+      <view class="result-metrics">
+        <view wx:for="{{result.metrics}}" wx:key="label" class="result-metric">
+          <text class="metric-label">{{item.label}}</text><view class="metric-value mono-data"><text>{{item.value}}</text><text class="metric-unit">{{item.unit}}</text></view>
+        </view>
+      </view>
+      <view class="decision-section">
+        <view class="decision-subtitle">按这些条件计算</view>
+        <view wx:for="{{result.details}}" wx:key="label" class="result-detail"><text class="decision-muted">{{item.label}}</text><text class="detail-value mono-data">{{item.value}}</text></view>
+      </view>
+      <view class="decision-muted result-caveat">{{result.caveat}}</view>
+      <view class="decision-section">
+        <view class="decision-subtitle">填写提醒</view>
+        <view wx:for="{{result.checks}}" wx:key="*this" class="result-check"><text aria-hidden="true">·</text><text>{{item}}</text></view>
+      </view>
+      <button class="method-toggle" bindtap="toggleMethod" hover-class="decision-pressed" aria-expanded="{{showMethod}}"><text>计算口径</text><text aria-hidden="true">{{showMethod ? '−' : '＋'}}</text></button>
+      <view wx:if="{{showMethod}}" class="decision-muted"><text wx:for="{{result.assumptions}}" wx:key="*this" class="decision-paragraph">{{item}}</text></view>
+      <view class="decision-actions decision-section"><button class="decision-secondary" bindtap="edit" hover-class="decision-pressed">修改条件</button><button class="decision-primary" open-type="share" hover-class="decision-pressed">分享工具</button></view>
+    </block>
+    <view class="result-links"><button class="decision-link" bindtap="openAbout" hover-class="decision-pressed">来源与隐私</button><button class="decision-link" bindtap="goHome" hover-class="decision-pressed">返回首页</button></view>
+  </view>
+</view>

@@ -1,7 +1,7 @@
 const { calculateJob, analyzeResults } = require("../../utils/offer-analysis");
-const { validateJobs, isValidDraft } = require("../../utils/offer-validation");
-const { RESULT_KEY, getMetrics, updateMetrics } = require("../../utils/storage");
-const { buildSharePath, enableShareMenu } = require("../../utils/share");
+const { getMetrics, updateMetrics } = require("../../utils/storage");
+const { loadOfferResult } = require("../../utils/offer-session");
+const { buildSharePath, enableShareMenu, SHARE_IMAGE } = require("../../utils/share");
 
 function toNumber(value) {
   return Number.parseFloat(value);
@@ -92,20 +92,21 @@ Page({
     caughtUp: false,
   },
 
-  onLoad() {
+  onLoad(options = {}) {
+    if (options.source === "timeline_breakeven") { wx.redirectTo({ url: "/pages/calculator/calculator" }); return; }
     enableShareMenu();
-    let payload;
-    try {
-      payload = wx.getStorageSync(RESULT_KEY);
-    } catch (_error) {
-      payload = null;
-    }
+    this.loadScenarios();
+  },
 
-    if (
-      !payload ||
-      !isValidDraft(payload.jobs) ||
-      Object.keys(validateJobs(payload.jobs)).length > 0
-    ) {
+  onShow() {
+    const payload = loadOfferResult();
+    if (JSON.stringify(payload?.jobs) !== this.resultSnapshot) this.loadScenarios();
+  },
+
+  loadScenarios() {
+    const payload = loadOfferResult();
+    this.resultSnapshot = JSON.stringify(payload?.jobs);
+    if (!payload) {
       this.setData({ empty: true });
       return;
     }
@@ -211,6 +212,7 @@ Page({
     return {
       title: "算清收入和时间，看看哪个 Offer 更值",
       path: buildSharePath("breakeven"),
+      imageUrl: SHARE_IMAGE,
     };
   },
 
@@ -218,6 +220,7 @@ Page({
     return {
       title: "真涨薪｜关键反超条件",
       query: "source=timeline_breakeven",
+      imageUrl: SHARE_IMAGE,
     };
   },
 });

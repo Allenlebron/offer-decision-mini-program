@@ -10,10 +10,12 @@
     <view class="result-content">
       <view class="result-hero">
         <view class="privacy-row">
-          <view class="privacy-badge">本机保存 · 不上传</view>
+          <view class="privacy-badge">{{storageNotice ? '本机计算 · 未保存完整' : '本机保存 · 不上传'}}</view>
           <text class="result-index mono-data">{{resultCards.length}} 份数据</text>
         </view>
         <text class="result-kicker">{{comparisonTitle}}</text>
+        <text wx:if="{{isExample}}" class="result-note">当前包含示例数据，不代表你的实际情况。</text>
+        <text wx:if="{{storageNotice}}" class="result-note" role="status">{{storageNotice}}</text>
         <view class="result-title" role="heading" aria-level="1">{{summaryTitle}}</view>
         <text class="result-note">综合价值包含税前保证收入和公司公积金年缴。</text>
       </view>
@@ -28,8 +30,8 @@
             class="table-data-cell table-header-cell column-{{card.id}}"
           >
             <text class="column-title">{{card.title}}</text>
-            <text wx:if="{{card.annualLeader}}" class="leader-tag leader-tag-annual">价值领先</text>
-            <text wx:if="{{card.hourlyLeader}}" class="leader-tag leader-tag-hourly">时薪领先</text>
+            <text wx:if="{{card.annualLeader}}" class="leader-tag leader-tag-annual">{{card.annualLeaderLabel}}</text>
+            <text wx:if="{{card.hourlyLeader}}" class="leader-tag leader-tag-hourly">{{card.hourlyLeaderLabel}}</text>
           </view>
         </view>
 
@@ -83,7 +85,7 @@
         </view>
       </view>
 
-      <view class="insight-section">
+      <view wx:if="{{insightRows.length}}" class="insight-section">
         <text class="section-title">相比当前工作</text>
         <view class="insight-list">
           <view wx:for="{{insightRows}}" wx:key="id" wx:for-item="insight" class="insight-row">

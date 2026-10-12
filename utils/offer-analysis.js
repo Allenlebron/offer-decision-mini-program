@@ -79,15 +79,9 @@ function summarizeLeaders(results, metric) {
 
 function calculateBreakEven(results) {
   const ranked = [...results].sort((a, b) => b.hourlyValue - a.hourlyValue);
-  if (
-    ranked.length < 2 ||
-    Math.abs(ranked[0].hourlyValue - ranked[1].hourlyValue) <= TOLERANCE
-  ) {
-    return null;
-  }
-
   const winner = ranked[0];
-  const challenger = ranked[1];
+  const challenger = ranked.find((result) => winner.hourlyValue - result.hourlyValue > TOLERANCE);
+  if (!challenger) return null;
   const targetAnnual = winner.hourlyValue * challenger.totalHours;
   const extraBonusMonths = Math.max(
     0,
@@ -142,6 +136,7 @@ function analyzeResults(results) {
 
   return {
     current,
+    hasMissingHousingFund: results.some((result) => result.employerHousingFundAnnual === null),
     annualLeaders,
     hourlyLeaders,
     annualSummary,

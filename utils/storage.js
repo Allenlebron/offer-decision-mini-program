@@ -1,6 +1,7 @@
 const DRAFT_KEY = "real-hike-mini-draft-v1";
 const RESULT_KEY = "real-hike-mini-result-v1";
 const METRICS_KEY = "real-hike-mini-metrics-v1";
+const OFFER_META_KEY = "real-hike-mini-draft-meta-v1";
 
 function createMetrics() {
   return {
@@ -33,6 +34,7 @@ module.exports = {
   DRAFT_KEY,
   RESULT_KEY,
   METRICS_KEY,
+  OFFER_META_KEY,
   getMetrics,
   updateMetrics,
 };

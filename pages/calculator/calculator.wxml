@@ -1,11 +1,13 @@
 <view class="page-shell calculator-page">
   <view class="page-toolbar">
-    <view class="local-badge" aria-label="薪资数据保存在本机，不会上传">
-      <text>本机保存 · 不上传</text>
+    <view class="local-badge" aria-label="{{storageNotice ? '数据尚未完整保存，不会上传' : '薪资数据保存在本机，不会上传'}}">
+      <text>{{storageNotice ? '本机计算 · 未保存完整' : '本机保存 · 不上传'}}</text>
     </view>
     <button class="example-button" bindtap="fillExample" hover-class="text-button-active">填入示例</button>
   </view>
 
+  <view wx:if="{{isExample}}" class="entry-note">当前包含示例数据，请按自己的情况修改。</view>
+  <view wx:if="{{storageNotice}}" class="entry-note" role="status">{{storageNotice}}</view>
   <view class="job-switcher" aria-label="切换工作选项">
     <button
       wx:for="{{viewJobs}}"
@@ -65,7 +67,6 @@
               <text class="field-hint">{{field.hint}}</text>
             </view>
             <view class="field-control">
-              <text wx:if="{{field.key === 'monthlySalary' && field.value}}" class="field-prefix">¥</text>
               <input
                 id="input-{{activeJob.id}}-{{field.key}}"
                 class="field-input mono-data {{field.key === 'monthlySalary' ? 'field-input-salary' : ''}}"
@@ -84,7 +85,7 @@
                 aria-invalid="{{field.error ? 'true' : 'false'}}"
                 aria-describedby="{{field.error ? 'error-' + activeJob.id + '-' + field.key : ''}}"
               />
-              <text wx:if="{{field.key !== 'monthlySalary'}}" class="field-suffix">{{field.suffix}}</text>
+              <text class="field-suffix">{{field.suffix}}</text>
               <button
                 wx:if="{{field.value}}"
                 class="clear-field-button"
@@ -260,7 +261,9 @@
       <text>公司公积金年缴存 = 缴存基数 × 公司比例 × 12；公司五险暂不折算金额。</text>
     </view>
   </view>
-  <button class="clear-data-button" bindtap="clearLocalData" hover-class="clear-data-button-active">清除本机数据</button>
+  <button class="clear-data-button" bindtap="resetOffer" hover-class="clear-data-button-active">重新填写当前场景</button>
+  <button class="clear-data-button" bindtap="openAbout" hover-class="clear-data-button-active">来源与隐私说明</button>
+  <button class="clear-data-button" bindtap="goHome" hover-class="clear-data-button-active">返回首页</button>
 
   <view class="submit-bar">
     <view class="submit-bar-inner">

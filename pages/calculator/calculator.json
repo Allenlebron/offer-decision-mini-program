@@ -1,7 +1,7 @@
 {
   "navigationBarTitleText": "真涨薪",
-  "navigationBarBackgroundColor": "#071426",
-  "navigationBarTextStyle": "white",
+  "navigationBarBackgroundColor": "#F4F7FC",
+  "navigationBarTextStyle": "black",
   "backgroundColor": "#F4F7FC",
   "backgroundTextStyle": "dark",
   "enablePullDownRefresh": false,

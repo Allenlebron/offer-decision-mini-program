@@ -61,3 +61,14 @@ test("only restores supported two- or three-option drafts", () => {
   });
   assert.equal(isValidDraft(legacyDraft), true);
 });
+
+test("rejects partial numeric strings and duplicate job ids", () => {
+  for (const value of ["25000oops", "1e4", "Infinity", "1.123", " "]) {
+    const jobs = cloneJobs(EXAMPLE_JOBS);
+    jobs[0].monthlySalary = value;
+    assert.ok(validateJobs(jobs)["current-monthlySalary"]);
+  }
+  const duplicate = cloneJobs(EXAMPLE_JOBS);
+  duplicate[2].id = "offerA";
+  assert.equal(isValidDraft(duplicate), false);
+});

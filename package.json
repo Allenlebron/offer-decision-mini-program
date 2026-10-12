@@ -1,11 +1,12 @@
 {
   "name": "real-hike-mini-program",
-  "version": "0.2.0",
+  "version": "0.3.2",
   "private": true,
-  "description": "真涨薪 Offer 真实价值对比微信小程序",
+  "description": "真涨薪：Offer、租房通勤与空窗期预算微信小程序",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "check": "node scripts/check.mjs",
+    "check:wechat": "node scripts/check-wechat.mjs",
     "verify": "npm test && npm run check"
   },
   "engines": {

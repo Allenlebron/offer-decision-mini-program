@@ -1,0 +1,27 @@
+<view class="decision-shell about-page">
+  <view class="decision-title">数字有口径，选择在你。</view>
+  <view class="decision-section">
+    <view class="decision-subtitle">我们怎么算</view>
+    <view wx:for="{{methods}}" wx:key="id" class="about-block"><view class="decision-subtitle">{{item.title}}</view><text class="decision-paragraph decision-muted">{{item.body}}</text></view>
+  </view>
+  <view class="decision-section">
+    <view class="decision-subtitle">参考来源</view>
+    <view wx:for="{{sources}}" wx:key="id" class="about-block">
+      <view>{{item.title}} · {{item.author}}</view>
+      <text class="decision-paragraph decision-muted">参考篇目：{{item.articleTitle}}；{{item.sections}}。</text>
+      <text class="decision-paragraph decision-muted">{{item.summary}}</text>
+      <text class="decision-paragraph decision-muted">{{item.adaptation}}</text>
+      <text class="decision-paragraph decision-muted">{{item.reviewScope}}</text>
+      <text class="decision-paragraph decision-muted">{{item.limitations}}</text>
+      <text class="decision-paragraph decision-muted">{{item.versionLabel}}。授权：{{item.licenseName}}。</text>
+      <view class="source-links"><button class="decision-link" data-id="project" bindtap="copySource" hover-class="decision-pressed">复制项目链接</button><button class="decision-link" data-id="article" bindtap="copySource" hover-class="decision-pressed">复制篇目链接</button><button class="decision-link" data-id="license" bindtap="copySource" hover-class="decision-pressed">复制授权链接</button></view>
+    </view>
+    <text class="decision-paragraph decision-muted">{{contentNotice}}</text>
+  </view>
+  <view class="decision-section">
+    <view class="decision-subtitle">你的数据</view>
+    <view wx:for="{{privacy}}" wx:key="id" class="about-block"><view class="decision-subtitle">{{item.title}}</view><text class="decision-paragraph decision-muted">{{item.body}}</text></view>
+  </view>
+  <button class="decision-secondary decision-section" bindtap="clearData" hover-class="decision-pressed">清除全部本机数据</button>
+  <button class="decision-link" bindtap="goHome" hover-class="decision-pressed">返回首页</button>
+</view>

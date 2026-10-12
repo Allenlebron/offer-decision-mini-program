@@ -224,7 +224,6 @@
   justify-content: flex-end;
 }
 
-.field-prefix,
 .field-suffix {
   flex: 0 0 auto;
   color: var(--text-secondary);
@@ -539,6 +538,17 @@
   opacity: 0.58;
 }
 
+/* Native style:v2 assigns a fixed width unless these layout rules win. */
+.calculator-page button.job-tab,
+.calculator-page button.submit-button { width: 0; margin-left: 0; margin-right: 0; }
+.calculator-page button.back-step-button { width: 84px; margin-left: 0; margin-right: 0; }
+.calculator-page button.clear-field-button { width: 44px; flex: 0 0 44px; margin-left: 0; margin-right: -6px; }
+.calculator-page button.guide-toggle { width: 100%; margin-left: 0; margin-right: 0; }
+.calculator-page button.example-button,
+.calculator-page button.remove-button,
+.calculator-page button.undo-button { width: auto; margin-left: 0; margin-right: 0; }
+.calculator-page button.clear-data-button { width: auto; }
+
 @media (max-width: 360px) {
   .calculator-page {
     padding-right: 12px;
@@ -551,23 +561,26 @@
   }
 
   .field-copy {
-    min-width: 86px;
+    min-width: 0;
+  }
+
+  .field-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
   }
 
   .field-control {
-    min-width: 142px;
+    min-width: 0;
+    width: 100%;
+    flex: 0 0 auto;
   }
 
-  .field-input {
-    width: 64px;
-  }
-
-  .field-input-salary {
-    width: 96px;
-  }
-
+  .field-input,
+  .field-input-salary,
   .field-input-money {
-    width: 84px;
+    width: 0;
+    flex: 1;
   }
 
   .benefit-content .field-copy {

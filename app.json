@@ -1,5 +1,9 @@
 {
   "pages": [
+    "pages/home/home",
+    "pages/decision/decision",
+    "pages/decision-result/decision-result",
+    "pages/about/about",
     "pages/calculator/calculator",
     "pages/result/result",
     "pages/breakeven/breakeven"

@@ -165,11 +165,14 @@ test("runs the real calculator and result page flow", () => {
   assert.equal(breakEven.data.draftBonusValue, 0);
 
   const share = result.onShareAppMessage();
-  assert.equal(share.title, result.data.headline);
+  assert.equal(share.title, "这次跳槽，真的涨薪了吗？");
+  assert.notEqual(share.title, result.data.headline);
   assert.equal(share.path, "/pages/calculator/calculator?source=result");
+  assert.equal(share.imageUrl, "/images/share-entry.png");
   assert.equal(harness.storage.get(METRICS_KEY).shares, 1);
 
   const breakEvenShare = breakEven.onShareAppMessage();
+  assert.equal(breakEvenShare.imageUrl, "/images/share-entry.png");
   assert.equal(
     breakEvenShare.path,
     "/pages/calculator/calculator?source=breakeven",
@@ -261,6 +264,19 @@ test("keeps benefit fields optional and expands them when entered values are inv
   assert.equal(harness.calls.navigateTo.length, 0);
 });
 
+test("invalid benefit values suppress the live estimate and completion check", () => {
+  const harness = createWxHarness();
+  const calculator = loadPage("../pages/calculator/calculator.js", harness.wx);
+  calculator.onLoad();
+  calculator.fillExample();
+  calculator.onInput({ currentTarget: { dataset: { jobId: "current", key: "employerHousingFundRate" } }, detail: { value: "101" } });
+  assert.equal(calculator.data.activePreview.ready, false);
+  assert.equal(calculator.data.activeJob.isComplete, false);
+  calculator.clearField({ currentTarget: { dataset: { jobId: "current", key: "employerHousingFundRate" } } });
+  assert.equal(calculator.data.activePreview.ready, true);
+  assert.equal(calculator.data.activeJob.isComplete, true);
+});
+
 test("blocks an incomplete calculation and points to the first field", () => {
   const harness = createWxHarness();
   const calculator = loadPage(
@@ -303,4 +319,114 @@ test("asks before example data replaces a populated draft", () => {
   harness.modalResponses.push({ confirm: true });
   calculator.fillExample();
   assert.equal(calculator.data.jobs[0].monthlySalary, "25000");
+});
+
+test("a storage quota failure still opens current offer results and break-even", () => {
+  const harness = createWxHarness();
+  harness.wx.setStorageSync = () => { throw new Error("quota exceeded"); };
+  const calculator = loadPage("../pages/calculator/calculator.js", harness.wx);
+  calculator.onLoad();
+  calculator.fillExample();
+  calculator.calculate();
+  assert.equal(calculator.data.isSubmitting, false);
+  assert.deepEqual(harness.calls.navigateTo, ["/pages/result/result"]);
+  assert.ok(harness.calls.toasts.some((toast) => toast.title === "结果可查看，但本次未能保存"));
+  const result = loadPage("../pages/result/result.js", harness.wx);
+  result.onLoad();
+  assert.equal(result.data.empty, false);
+  assert.equal(result.data.isExample, true);
+  const breakeven = loadPage("../pages/breakeven/breakeven.js", harness.wx);
+  breakeven.onLoad();
+  assert.equal(breakeven.data.empty, false);
+});
+
+test("editing an offer invalidates results even when disk invalidation fails", () => {
+  const harness = createWxHarness();
+  const calculator = loadPage("../pages/calculator/calculator.js", harness.wx);
+  calculator.onLoad();
+  calculator.fillExample();
+  calculator.calculate();
+  const result = loadPage("../pages/result/result.js", harness.wx);
+  result.onLoad();
+  const breakeven = loadPage("../pages/breakeven/breakeven.js", harness.wx);
+  breakeven.onLoad();
+  harness.wx.setStorageSync = () => { throw new Error("write failure"); };
+  harness.wx.removeStorageSync = () => { throw new Error("remove failure"); };
+  calculator.onInput({ currentTarget: { dataset: { jobId: "current", key: "monthlySalary" } }, detail: { value: "12abc" } });
+  result.onShow();
+  breakeven.onShow();
+  assert.equal(result.data.empty, true);
+  assert.equal(breakeven.data.empty, true);
+  assert.equal(harness.storage.get(RESULT_KEY).jobs[0].monthlySalary, "25000");
+});
+
+test("offer share titles and queries never expose a customized result", () => {
+  const harness = createWxHarness();
+  const result = loadPage("../pages/result/result.js", harness.wx);
+  result.data.headline = "PRIVATE_NAME 薪资 1234567";
+  assert.doesNotMatch(JSON.stringify(result.onShareAppMessage()), /PRIVATE_NAME|1234567/);
+  assert.doesNotMatch(JSON.stringify(result.onShareTimeline()), /PRIVATE_NAME|1234567/);
+});
+
+test("corrupt offer draft is reported, not silently removed", () => {
+  const harness = createWxHarness();
+  harness.storage.set(DRAFT_KEY, { unsupported: true });
+  const calculator = loadPage("../pages/calculator/calculator.js", harness.wx);
+  calculator.onLoad();
+  assert.deepEqual(harness.storage.get(DRAFT_KEY), { unsupported: true });
+  assert.ok(harness.calls.toasts.some((toast) => /无法恢复/.test(toast.title)));
+  assert.equal(calculator.data.jobs[0].monthlySalary, "");
+});
+
+test("confirmed clear-all removes the three scenarios and runtime offer fallback", () => {
+  const { KEYS } = require("../utils/decision-storage");
+  const { loadOfferResult } = require("../utils/offer-session");
+  const harness = createWxHarness();
+  const calculator = loadPage("../pages/calculator/calculator.js", harness.wx);
+  calculator.onLoad();
+  calculator.fillExample();
+  calculator.calculate();
+  harness.storage.set(KEYS.rent, { private: "rent" });
+  harness.storage.set(KEYS.budget, { private: "budget" });
+  calculator.clearLocalData();
+  assert.ok(harness.storage.has(KEYS.rent));
+  harness.modalResponses.push({ confirm: true });
+  calculator.clearLocalData();
+  assert.equal(harness.storage.has(KEYS.rent), false);
+  assert.equal(harness.storage.has(KEYS.budget), false);
+  assert.equal(loadOfferResult(), null);
+});
+
+test("offer result qualifies incomplete housing fund data and does not label ties as wins", () => {
+  const { EXAMPLE_JOBS, cloneJobs } = require("../utils/offer-data");
+  const harness = createWxHarness();
+  const jobs = cloneJobs(EXAMPLE_JOBS).slice(0, 2);
+  jobs[1] = { ...jobs[0], id: "offerA", title: "Offer A" };
+  harness.storage.set(RESULT_KEY, { jobs, calculatedAt: 1 });
+  const result = loadPage("../pages/result/result.js", harness.wx);
+  result.onLoad();
+  assert.match(result.data.summaryTitle, /持平/);
+  assert.doesNotMatch(result.data.summaryTitle, /领先/);
+  assert.equal(result.data.resultCards[0].annualLeaderLabel, "价值持平");
+  assert.equal(result.data.resultCards[1].hourlyLeaderLabel, "时薪持平");
+  assert.deepEqual(result.data.insightRows, []);
+  jobs[1].housingFundBase = "";
+  harness.storage.set(RESULT_KEY, { jobs, calculatedAt: 2 });
+  result.onShow();
+  assert.match(result.data.summaryTitle, /按已填写项目比较/);
+  assert.match(result.data.summaryTitle, /部分公司公积金未计入/);
+  assert.equal(result.data.benefitRows[3].cells[1].value, "未计入");
+});
+
+test("small genuine differences are not presented as zero", () => {
+  const { EXAMPLE_JOBS, cloneJobs } = require("../utils/offer-data");
+  const harness = createWxHarness();
+  const jobs = cloneJobs(EXAMPLE_JOBS).slice(0, 2);
+  jobs[1] = { ...jobs[0], id: "offerA", title: "Offer A", monthlySalary: "25010" };
+  harness.storage.set(RESULT_KEY, { jobs, calculatedAt: 1 });
+  const result = loadPage("../pages/result/result.js", harness.wx);
+  result.onLoad();
+  assert.equal(result.data.insightRows[0].value, "+140元");
+  assert.equal(result.data.insightRows[1].value, "+不足1元/时");
+  assert.equal(result.data.insightRows[2].value, "与当前相同");
 });

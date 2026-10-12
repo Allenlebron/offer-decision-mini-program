@@ -9,18 +9,16 @@ const {
 const {
   validateField,
   validateJobs,
-  isValidDraft,
 } = require("../../utils/offer-validation");
 const { calculateJob, analyzeResults } = require("../../utils/offer-analysis");
 const { formatMoney, formatWan } = require("../../utils/format");
 const {
-  DRAFT_KEY,
-  RESULT_KEY,
-  METRICS_KEY,
   getMetrics,
   updateMetrics,
 } = require("../../utils/storage");
-const { buildSharePath, enableShareMenu } = require("../../utils/share");
+const { restoreOfferDraft, saveOfferDraft, saveOfferResult } = require("../../utils/offer-session");
+const { clearAllData, clearOfferData } = require("../../utils/decision-storage");
+const { buildSharePath, enableShareMenu, SHARE_IMAGE } = require("../../utils/share");
 
 const ALL_FIELDS = [...FIELDS, ...BENEFIT_FIELDS];
 const BENEFIT_FIELD_KEYS = new Set(BENEFIT_FIELDS.map((field) => field.key));
@@ -35,7 +33,7 @@ const FIELD_PRESENTATION = {
     placeholder: "手动填写",
   },
   guaranteedBonusMonths: {
-    hint: "只填确定发放的部分",
+    hint: "只填确定发放、且未计入固定发薪的部分",
     placeholder: "手动填写",
   },
   weeklyHours: {
@@ -88,7 +86,7 @@ function createViewJobs(jobs, fieldErrors, activeJobIndex) {
     index,
     displayIndex: index < 9 ? `0${index + 1}` : String(index + 1),
     selected: index === activeJobIndex,
-    isComplete: FIELDS.every(
+    isComplete: ALL_FIELDS.every(
       (field) => !validateField(job[field.key], field),
     ),
     filledCount: FIELDS.filter((field) => String(job[field.key]).trim()).length,
@@ -111,7 +109,7 @@ function createViewJobs(jobs, fieldErrors, activeJobIndex) {
 }
 
 function createPreview(job) {
-  const complete = FIELDS.every(
+  const complete = ALL_FIELDS.every(
     (field) => !validateField(job[field.key], field),
   );
   if (!complete) {
@@ -166,16 +164,19 @@ Page({
     isSubmitting: false,
     showGuide: false,
     showBenefits: false,
+    isExample: false,
+    storageNotice: "",
   },
 
   onLoad() {
     enableShareMenu();
     let jobs = cloneJobs(BLANK_JOBS);
-    try {
-      const storedDraft = wx.getStorageSync(DRAFT_KEY);
-      if (isValidDraft(storedDraft)) jobs = cloneJobs(storedDraft);
-    } catch (_error) {
-      // A corrupt or unavailable draft should never block a fresh calculation.
+    const restored = restoreOfferDraft();
+    if (restored.status === "ready") {
+      jobs = cloneJobs(restored.jobs);
+      this.setData({ isExample: restored.example, storageNotice: restored.saved === false ? "草稿未保存完整，退出微信后可能无法恢复。" : "" });
+    } else if (restored.status === "corrupt" || restored.status === "unavailable") {
+      wx.showToast({ title: "草稿暂时无法恢复，可以重新填写", icon: "none" });
     }
 
     const metrics = getMetrics();
@@ -219,11 +220,8 @@ Page({
     }
 
     if (persist) {
-      try {
-        wx.setStorageSync(DRAFT_KEY, jobs);
-      } catch (_error) {
-        wx.showToast({ title: "草稿未保存，请继续完成计算", icon: "none" });
-      }
+      const saved = saveOfferDraft(jobs, this.data.isExample);
+      this.setData({ storageNotice: saved ? "" : "草稿未保存完整，仍可计算；退出微信后可能无法恢复。" });
     }
   },
 
@@ -332,6 +330,7 @@ Page({
 
   applyExample() {
     this.setData({
+      isExample: true,
       activeJobIndex: 0,
       generalError: "",
       removedOffer: null,
@@ -444,10 +443,9 @@ Page({
     try {
       const results = this.data.jobs.map(calculateJob);
       analyzeResults(results);
-      wx.setStorageSync(RESULT_KEY, {
-        jobs: this.data.jobs,
-        calculatedAt: Date.now(),
-      });
+      const saved = saveOfferResult(this.data.jobs, this.data.isExample);
+      this.setData({ storageNotice: saved ? "" : "草稿与结果未保存完整，退出微信后可能无法恢复。" });
+      if (!saved) wx.showToast({ title: "结果可查看，但本次未能保存", icon: "none" });
       const metrics = getMetrics();
       updateMetrics({ calculations: metrics.calculations + 1 });
       wx.navigateTo({
@@ -463,20 +461,27 @@ Page({
     }
   },
 
+  goHome() { wx.reLaunch({ url: "/pages/home/home" }); },
+  openAbout() { wx.navigateTo({ url: "/pages/about/about" }); },
+  resetOffer() {
+    wx.showModal({ title: "重新填写 Offer？", content: "只清除 Offer 草稿与结果，租房和预算保持不变。", confirmText: "重新填写", success: ({ confirm }) => {
+      if (!confirm) return;
+      if (!clearOfferData()) { wx.showToast({ title: "清除失败，请重试", icon: "none" }); return; }
+      this.setData({ activeJobIndex: 0, generalError: "", removedOffer: null, undoOfferVisible: false, showBenefits: false, isExample: false, storageNotice: "" });
+      this.syncJobs(cloneJobs(BLANK_JOBS), {}, false);
+    } });
+  },
+
   clearLocalData() {
     wx.showModal({
       title: "清除本机数据？",
-      content: "会删除当前草稿和最近一次计算结果。",
+      content: "会删除 Offer、租房通勤、空窗期预算的本机草稿与结果。此操作无法撤销。",
       confirmText: "清除数据",
       confirmColor: "#A12F39",
       cancelText: "保留数据",
       success: ({ confirm }) => {
         if (!confirm) return;
-        try {
-          wx.removeStorageSync(DRAFT_KEY);
-          wx.removeStorageSync(RESULT_KEY);
-          wx.removeStorageSync(METRICS_KEY);
-        } catch (_error) {
+        if (!clearAllData()) {
           wx.showToast({ title: "数据未完全清除，请重试", icon: "none" });
           return;
         }
@@ -487,6 +492,8 @@ Page({
           undoOfferVisible: false,
           showGuide: false,
           showBenefits: false,
+          isExample: false,
+          storageNotice: "",
         });
         this.syncJobs(cloneJobs(BLANK_JOBS), {}, false);
         updateMetrics({});
@@ -501,6 +508,7 @@ Page({
     return {
       title: "这次跳槽，真的涨薪了吗？",
       path: buildSharePath("calculator"),
+      imageUrl: SHARE_IMAGE,
     };
   },
 
@@ -508,6 +516,7 @@ Page({
     return {
       title: "真涨薪｜Offer 真实价值对比",
       query: "source=timeline_calculator",
+      imageUrl: SHARE_IMAGE,
     };
   },
 });

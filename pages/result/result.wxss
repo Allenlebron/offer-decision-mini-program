@@ -351,6 +351,12 @@
   color: var(--text-on-dark);
 }
 
+.result-page button.break-even-button { box-sizing: border-box; width: 100%; margin-left: 0; margin-right: 0; }
+.result-page button.edit-button { box-sizing: border-box; width: 42%; margin-left: 0; margin-right: 0; }
+.result-page button.share-button { width: 0; flex: 1 1 0; margin-left: 0; margin-right: 0; }
+.result-page button.primary-button { width: auto; margin-left: 0; margin-right: 0; }
+.result-page button.clear-button { width: auto; margin-left: 0; margin-right: 0; }
+
 @media (max-width: 360px) {
   .result-content {
     padding-right: 12px;

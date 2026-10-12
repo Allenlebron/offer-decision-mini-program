@@ -4,8 +4,9 @@ const ALL_FIELDS = [...FIELDS, ...BENEFIT_FIELDS];
 
 function validateField(value, field) {
   if (field.optional && String(value ?? "").trim() === "") return "";
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed) || parsed < field.min || parsed > field.max) {
+  const input = String(value ?? "").trim();
+  const parsed = Number(input);
+  if (!/^\d+(?:\.\d{1,2})?$/.test(input) || !Number.isFinite(parsed) || parsed < field.min || parsed > field.max) {
     return field.invalidMessage;
   }
   return "";
@@ -43,7 +44,8 @@ function isValidDraft(value) {
     value.length <= 3 &&
     value.every(isSupportedJob) &&
     value[0].id === "current" &&
-    value[1].id === "offerA"
+    value[1].id === "offerA" &&
+    (value.length === 2 || value[2].id === "offerB")
   );
 }
 
