@@ -1,6 +1,7 @@
 <view class="decision-shell home-page">
   <view class="home-heading" role="heading" aria-level="1">算清楚，再决定。</view>
   <view class="home-intro">关于工作，也关于生活。</view>
+  <button class="habits-entry" bindtap="openHabits" hover-class="entry-pressed"><view class="entry-copy"><view class="entry-heading">日常打卡</view><view class="entry-description">喝水、睡眠、运动，随手记一下。</view></view><text class="entry-arrow" aria-hidden="true">›</text></button>
   <button wx:if="{{entries.length}}" class="offer-entry" data-id="offer" bindtap="openScenario" hover-class="offer-pressed" aria-label="Offer 对比，{{entries[0].saved ? '继续填写' : '开始对比'}}">
     <view class="offer-label">Offer 对比</view>
     <view class="offer-title"><view>换一份工作，</view><view>真的涨薪了吗？</view></view>

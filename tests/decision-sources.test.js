@@ -16,10 +16,11 @@ test("bundled reference distinguishes source verification from policy review", (
 });
 
 test("each scenario has a model explanation rather than a universal recommendation", () => {
-  assert.deepEqual(METHOD_NOTES.map((note) => note.id), ["offer", "rent", "budget"]);
-  assert.match(METHOD_NOTES[0].body, /不是税后到账收入/);
-  assert.match(METHOD_NOTES[1].body, /未计押金/);
-  assert.match(METHOD_NOTES[2].body, /向下保留一位小数/);
+  assert.deepEqual(METHOD_NOTES.map((note) => note.id), ["habits", "offer", "rent", "budget"]);
+  assert.match(METHOD_NOTES[0].body, /空白睡眠不按零小时/);
+  assert.match(METHOD_NOTES[1].body, /不是税后到账收入/);
+  assert.match(METHOD_NOTES[2].body, /未计押金/);
+  assert.match(METHOD_NOTES[3].body, /向下保留一位小数/);
 });
 
 test("public source links cannot contain caller supplied URLs or private values", () => {

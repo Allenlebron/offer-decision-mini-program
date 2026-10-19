@@ -289,7 +289,7 @@ Page({
   clearLocalData() {
     wx.showModal({
       title: "清除本机数据？",
-      content: "会删除 Offer、租房通勤、空窗期预算的本机草稿与结果。此操作无法撤销。",
+      content: "会删除 Offer、租房通勤、空窗期预算的本机草稿与结果，以及日常打卡记录和目标。此操作无法撤销。",
       confirmText: "清除数据",
       confirmColor: "#A12F39",
       cancelText: "保留数据",

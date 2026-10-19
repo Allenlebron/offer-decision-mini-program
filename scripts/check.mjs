@@ -16,6 +16,7 @@ for (const folder of ["assets", "docs", "tests", "scripts", "writing-workspace",
 readFileSync(join(root, "images/share-entry.png"));
 assert.deepEqual(appConfig.pages, [
   "pages/home/home",
+  "pages/habits/habits",
   "pages/decision/decision",
   "pages/decision-result/decision-result",
   "pages/about/about",

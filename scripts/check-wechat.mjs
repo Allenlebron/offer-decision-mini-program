@@ -2,7 +2,11 @@ import { readFileSync, existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 
-const compilerDir = process.env.WECHAT_COMPILER_DIR || "/Applications/wechatwebdevtools.app/Contents/Resources/package.nw/node_modules/wcc-exec";
+const resources = "/Applications/wechatwebdevtools.app/Contents/Resources";
+const compilerDir = process.env.WECHAT_COMPILER_DIR || [
+  join(resources, "app.asar.unpacked/node_modules/wcc-exec"),
+  join(resources, "package.nw/node_modules/wcc-exec"),
+].find((dir) => existsSync(join(dir, "wcc"))) || join(resources, "package.nw/node_modules/wcc-exec");
 for (const name of ["wcc", "wcsc"]) {
   if (!existsSync(join(compilerDir, name))) throw new Error(`缺少微信编译器 ${name}；请配置 WECHAT_COMPILER_DIR`);
 }

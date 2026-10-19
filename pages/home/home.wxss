@@ -1,6 +1,7 @@
 @import "../../styles/decision.wxss";
 .home-page button.offer-entry, .home-page button.scenario-entry { width: 100%; max-width: none; margin-left: 0; margin-right: 0; }
 .home-page button.about-link { width: auto; margin: 0; }
+.home-page button.habits-entry { display: flex; align-items: center; width: 100%; min-height: 80px; margin: 24px 0 0; padding: 16px; background: var(--surface-raised); border: 1px solid var(--border-light); border-radius: 12px; text-align: left; white-space: normal; line-height: 1.5; }
 .home-page { padding: 24px 24px calc(24px + env(safe-area-inset-bottom)); }
 .home-heading { color: var(--text-primary); font-size: 28px; font-weight: 650; line-height: 1.3; letter-spacing: -0.02em; }
 .home-intro { margin-top: 8px; color: var(--text-secondary); font-size: 16px; }

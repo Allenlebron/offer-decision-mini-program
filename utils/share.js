@@ -4,6 +4,7 @@ const SHARE_IMAGE = "/images/share-entry.png";
 
 function scenarioShare(scenario) {
   const entries = {
+    habits: { title: "喝水、睡眠、运动，按自己的节奏记录", path: "/pages/habits/habits" },
     rent: { title: "住近一点值不值？算算房租与通勤", path: "/pages/decision/decision?scenario=rent" },
     budget: { title: "暂时不工作，现有预算能覆盖多久？", path: "/pages/decision/decision?scenario=budget" },
   };

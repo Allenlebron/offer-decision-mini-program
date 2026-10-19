@@ -1,0 +1,72 @@
+<view class="habits-page">
+  <view class="page-title" role="heading" aria-level="1">照顾好自己的日常</view>
+  <text class="muted intro">喝水、睡好、动一动。按自己的节奏来。</text>
+  <view class="tabs">
+    <button class="tab {{tab === 'today' ? 'selected' : ''}}" data-tab="today" bindtap="switchTab" aria-pressed="{{tab === 'today'}}">记录</button>
+    <button class="tab {{tab === 'history' ? 'selected' : ''}}" data-tab="history" bindtap="switchTab" aria-pressed="{{tab === 'history'}}">回顾</button>
+    <button class="tab {{tab === 'settings' ? 'selected' : ''}}" data-tab="settings" bindtap="switchTab" aria-pressed="{{tab === 'settings'}}">目标</button>
+  </view>
+  <view wx:if="{{error}}" class="feedback error" role="alert">{{error}}</view>
+  <view wx:elif="{{notice}}" class="feedback" role="status" aria-live="polite">{{notice}}</view>
+  <view wx:if="{{status !== 'ready'}}" class="blocked">
+    <view class="section-title">{{status === 'corrupt' ? '记录暂时无法读取' : '本机存储暂不可用'}}</view>
+    <text class="muted">原有数据未被覆盖，请先重试。</text>
+    <button class="primary" bindtap="load">重新读取</button>
+    <button wx:if="{{status === 'corrupt'}}" class="text-button danger" bindtap="clearHabits">清除打卡数据后重新开始</button>
+  </view>
+  <block wx:else>
+    <view wx:if="{{tab !== 'settings'}}" class="date-row">
+      <picker mode="date" value="{{selected}}" start="2000-01-01" end="{{today}}" bindchange="chooseDate"><view class="date-button" role="button" aria-label="选择记录日期">{{selected === today ? '今天' : selected}} <text class="muted">换一天⌄</text></view></picker>
+      <button wx:if="{{selected !== today}}" class="text-button" bindtap="goToday">回到今天</button>
+    </view>
+    <block wx:if="{{tab === 'today'}}">
+      <view class="water-section">
+        <view class="section-heading"><text class="section-title">喝水</text><text class="muted">{{goals.water ? '自定目标 ' + goals.water + ' ml' : '按需饮水'}}</text></view>
+        <view class="water-number mono-data">{{stats.water}} <text>ml 已记录</text></view>
+        <progress wx:if="{{goals.water}}" percent="{{waterProgress}}" stroke-width="4" activeColor="#2463FF" backgroundColor="#D8E0EB" />
+        <view class="quick-water">
+          <button data-amount="150" bindtap="addWater">+150 ml</button><button data-amount="250" bindtap="addWater">+250 ml</button><button data-amount="500" bindtap="addWater">+500 ml</button>
+        </view>
+        <view class="input-action"><input type="number" value="{{waterInput}}" data-key="waterInput" bindinput="input" placeholder="其他容量（ml）" aria-label="其他饮水容量，毫升" maxlength="4" /><button class="small-action" bindtap="addWater">记录</button></view>
+        <view class="water-foot"><text class="muted">{{day.water.length}} 杯{{day.water.length ? ' · 最后一杯 ' + day.water[day.water.length - 1] + ' ml' : ''}}</text><button class="text-button" disabled="{{!day.water.length}}" bindtap="undoWater">撤销一杯</button></view>
+      </view>
+      <view class="section">
+        <view class="section-heading"><text class="section-title">睡眠</text><text class="muted">{{goals.sleep ? '自定目标 ' + goals.sleep + ' 小时' : '起床后记一次'}}</text></view>
+        <text class="muted description">归到醒来的这一天；填写实际睡眠时长。</text>
+        <view class="input-action"><input type="digit" value="{{sleepInput}}" data-key="sleepInput" bindinput="input" placeholder="睡了几小时" aria-label="实际睡眠时长，小时" maxlength="5" /><button class="small-action" bindtap="saveSleep">{{day.sleep !== null ? '更新' : '保存'}}</button></view>
+        <view wx:if="{{day.sleep !== null}}" class="water-foot"><text class="muted">已记录 {{day.sleep}} 小时</text><button class="text-button" bindtap="removeSleep">删除记录</button></view>
+      </view>
+      <view class="section">
+        <view class="section-heading"><text class="section-title">运动</text><text class="muted">按周积累，休息也可以</text></view>
+        <view class="week-note">这周力量训练 <text class="strong">{{week.strength}}{{goals.strength ? ' / ' + goals.strength : ''}} 次</text></view>
+        <picker mode="selector" range="{{types}}" value="{{typeIndex}}" bindchange="chooseType"><view class="picker-control" role="button" aria-label="选择运动类型">{{types[typeIndex]}}<text class="muted">更换⌄</text></view></picker>
+        <view class="input-action"><input type="number" value="{{minutesInput}}" data-key="minutesInput" bindinput="input" placeholder="运动了几分钟" aria-label="运动时长，分钟" maxlength="3" /><button class="small-action" bindtap="addExercise">记录</button></view>
+        <view wx:for="{{day.exercise}}" wx:key="index" class="exercise-row"><text>{{item.type}} · {{item.minutes}} 分钟</text><button class="text-button" data-index="{{index}}" bindtap="removeExercise" aria-label="删除{{item.type}}{{item.minutes}}分钟记录">删除</button></view>
+        <text wx:if="{{!day.exercise.length}}" class="muted description">这天还没有运动记录。</text>
+      </view>
+    </block>
+    <block wx:elif="{{tab === 'history'}}">
+      <view class="section-title">这一周</view><text class="muted description">{{week.start}} — {{week.end}} · 周一开始</text>
+      <view class="review-row"><text>力量训练</text><text>{{week.strength}}{{goals.strength ? ' / ' + goals.strength : ''}} 次</text></view>
+      <view class="review-row"><text>全部运动</text><text>{{week.minutes}} 分钟</text></view>
+      <view class="review-row"><text>记录饮水</text><text>{{week.waterDays}} 天</text></view>
+      <view class="review-row"><text>已记录的平均睡眠</text><text>{{week.sleepAverage}} 小时</text></view>
+      <text class="muted description">睡眠均值只包含已记录的 {{week.sleepDays}} 天。空白不算 0。</text>
+      <view class="section">
+        <view class="section-title">截至所选日期的 7 天</view><text class="muted description">点一天可查看或补记；其他日期可从上方选择。</text>
+        <view class="history-header muted"><text>日期</text><text>水 ml</text><text>睡眠 h</text><text>运动 min</text></view>
+        <button wx:for="{{recent}}" wx:key="date" class="history-row" data-date="{{item.date}}" bindtap="openDay" aria-label="查看{{item.date}}记录"><text>{{item.label}}</text><text>{{item.water || '—'}}</text><text>{{item.sleepText}}</text><text>{{item.minutes || '—'}}</text></button>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="section-title">设定自己的节奏</view>
+      <text class="muted description">目标可留空，照常记录。这些数字只用于个人进度展示。</text>
+      <view class="goal-field"><label for="water-goal">每天饮水 · ml</label><input id="water-goal" type="number" value="{{goalsForm.water}}" data-key="water" bindinput="goalInput" placeholder="不设置可留空" maxlength="5" /></view>
+      <view class="goal-field"><label for="sleep-goal">每天睡眠 · 小时</label><input id="sleep-goal" type="digit" value="{{goalsForm.sleep}}" data-key="sleep" bindinput="goalInput" placeholder="不设置可留空" maxlength="5" /></view>
+      <view class="goal-field"><label for="strength-goal">每周力量训练 · 次</label><input id="strength-goal" type="number" value="{{goalsForm.strength}}" data-key="strength" bindinput="goalInput" placeholder="不设置可留空" maxlength="2" /></view>
+      <button class="primary" bindtap="saveGoals">保存目标</button>
+      <view class="section"><view class="section-title">我的记录</view><text class="muted description">记录只在本机保存。换手机或清理微信数据可能丢失；可复制 JSON 到自己的文件中留存。</text><button class="secondary" bindtap="exportData">复制记录 JSON</button><button class="text-button danger" bindtap="clearHabits">清除日常打卡数据</button></view>
+    </block>
+    <view class="footer"><text class="muted">本机保存 · 不上传</text><button class="text-button" bindtap="openAbout">来源与隐私</button></view>
+  </block>
+</view>

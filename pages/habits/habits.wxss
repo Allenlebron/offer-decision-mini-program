@@ -1,0 +1,46 @@
+.habits-page { padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); max-width: 600px; margin: 0 auto; }
+.habits-page button { box-sizing: border-box; min-height: 48px; margin: 0; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 600; line-height: 1.5; white-space: normal; }
+.page-title { font-size: 23px; font-weight: 650; line-height: 1.35; }
+.muted { color: var(--text-secondary); font-size: 14px; }
+.intro, .description { display: block; margin-top: 8px; line-height: 1.6; }
+.tabs { display: flex; padding: 4px; margin: 24px 0 16px; background: var(--surface-muted); border-radius: 12px; }
+.habits-page button.tab { width: 0; flex: 1; background: transparent; color: var(--text-secondary); }
+.habits-page button.tab.selected { background: var(--surface-raised); color: var(--accent-strong); }
+.date-row, .section-heading, .water-foot, .footer, .exercise-row, .review-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.date-row { margin-bottom: 16px; }
+.date-button { min-height: 48px; display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.section-title { font-size: 17px; font-weight: 650; }
+.water-section { padding: 20px; border-radius: 12px; background: var(--surface-raised); }
+.water-number { margin: 12px 0; color: var(--accent-strong); font-size: 28px; font-weight: 650; }
+.water-number text { font-size: 14px; font-weight: 400; color: var(--text-secondary); }
+.quick-water { display: flex; gap: 8px; margin-top: 16px; }
+.habits-page .quick-water button { flex: 1; width: 0; padding: 12px 4px; background: var(--accent-soft); color: var(--accent-strong); font-size: 14px; }
+.input-action { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.habits-page input { min-width: 0; height: 48px; padding: 0 12px; background: var(--surface-raised); border: 1px solid var(--border-light); border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+.input-action input { flex: 1; width: 0; }
+.habits-page input::placeholder { color: var(--text-placeholder); }
+.habits-page button.small-action { width: 64px; flex: none; padding: 12px 8px; color: var(--accent-strong); background: var(--accent-soft); }
+.habits-page button.text-button { width: auto; min-width: 48px; background: transparent; color: var(--accent-strong); font-size: 14px; padding: 12px 0; }
+.habits-page button[disabled] { color: var(--text-secondary); opacity: 0.65; }
+.water-foot { margin-top: 4px; }
+.section { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-light); }
+.week-note { margin: 12px 0; font-size: 16px; }
+.strong { color: var(--accent-strong); font-weight: 650; }
+.picker-control { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 12px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--surface-raised); }
+.exercise-row { margin-top: 8px; font-size: 14px; border-bottom: 1px solid var(--border-light); }
+.review-row { padding: 16px 0; border-bottom: 1px solid var(--border-light); font-variant-numeric: tabular-nums; }
+.history-header, .habits-page button.history-row { display: flex; width: 100%; padding: 12px 0; border-bottom: 1px solid var(--border-light); border-radius: 0; background: transparent; font-size: 14px; font-weight: 400; }
+.history-header { margin-top: 16px; }
+.history-header text, .history-row text { flex: 1; text-align: right; min-width: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.history-header text:first-child, .history-row text:first-child { text-align: left; }
+.goal-field { margin-top: 20px; }
+.goal-field label { display: block; margin-bottom: 8px; }
+.habits-page .goal-field input { width: 100%; }
+.habits-page button.primary, .habits-page button.secondary { width: 100%; margin-top: 20px; background: var(--accent); color: #fff; }
+.habits-page button.secondary { background: var(--surface-muted); color: var(--text-primary); }
+.habits-page button.danger { color: var(--danger); }
+.feedback { margin-bottom: 16px; padding: 12px; background: var(--accent-soft); color: var(--accent-strong); font-size: 14px; border-radius: 8px; }
+.feedback.error { color: var(--danger); background: var(--surface-error); }
+.footer { margin-top: 24px; }
+.blocked { padding-top: 16px; }
+@media (max-width: 360px) { .habits-page { padding-left: 16px; padding-right: 16px; } .water-section { padding: 16px; } }

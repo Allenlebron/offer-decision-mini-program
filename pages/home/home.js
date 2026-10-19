@@ -19,6 +19,7 @@ Page({
     wx.navigateTo({ url: id === "offer" ? "/pages/calculator/calculator" : `/pages/decision/decision?scenario=${id}` });
   },
   openAbout() { wx.navigateTo({ url: "/pages/about/about" }); },
+  openHabits() { wx.navigateTo({ url: "/pages/habits/habits" }); },
   onShareAppMessage() { return scenarioShare(); },
   onShareTimeline() { const share = scenarioShare(); return { title: share.title, imageUrl: share.imageUrl }; },
 });

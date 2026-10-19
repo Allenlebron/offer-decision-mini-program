@@ -1,6 +1,7 @@
 const { SCENARIOS, createDraft } = require("./decision-data");
 const { DRAFT_KEY, RESULT_KEY, METRICS_KEY, OFFER_META_KEY } = require("./storage");
 const { clearOfferSession } = require("./offer-session");
+const { HABITS_KEY } = require("./habits");
 
 const KEYS = { rent: "life-decision-rent-v1", budget: "life-decision-budget-v1" };
 const SCHEMA_VERSION = 1;
@@ -64,7 +65,7 @@ function clearDraft(scenario) {
 
 function clearAllData() {
   clearOfferSession();
-  return clearKeys([DRAFT_KEY, RESULT_KEY, METRICS_KEY, OFFER_META_KEY, ...Object.values(KEYS)]);
+  return clearKeys([DRAFT_KEY, RESULT_KEY, METRICS_KEY, OFFER_META_KEY, ...Object.values(KEYS), HABITS_KEY]);
 }
 
 function clearOfferData() {
