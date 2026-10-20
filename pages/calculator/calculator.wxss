@@ -119,8 +119,12 @@
 
 .entry-note {
   min-height: 46px;
-  gap: 7px;
-  color: var(--text-secondary);
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--text-primary);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -235,12 +239,16 @@
   width: 72px;
   min-width: 0;
   height: 44px;
-  padding: 0;
+  padding: 0 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--surface-raised);
   color: var(--text-primary);
   font-size: 16px;
   font-weight: 650;
   line-height: 44px;
   text-align: right;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .field-input-salary {
@@ -252,6 +260,8 @@
 }
 
 .field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
   color: var(--accent-strong);
 }
 
@@ -263,9 +273,9 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  margin: 0 -6px 0 0;
+  margin: 0;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 20px;
   font-weight: 400;
   line-height: 44px;
@@ -542,7 +552,7 @@
 .calculator-page button.job-tab,
 .calculator-page button.submit-button { width: 0; margin-left: 0; margin-right: 0; }
 .calculator-page button.back-step-button { width: 84px; margin-left: 0; margin-right: 0; }
-.calculator-page button.clear-field-button { width: 44px; flex: 0 0 44px; margin-left: 0; margin-right: -6px; }
+.calculator-page button.clear-field-button { width: 44px; flex: 0 0 44px; margin-left: 0; margin-right: 0; }
 .calculator-page button.guide-toggle { width: 100%; margin-left: 0; margin-right: 0; }
 .calculator-page button.example-button,
 .calculator-page button.remove-button,

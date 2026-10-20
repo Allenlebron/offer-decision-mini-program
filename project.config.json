@@ -17,6 +17,9 @@
       { "value": "image-cards", "type": "folder" },
       { "value": ".baoyu-skills", "type": "folder" },
       { "value": ".impeccable", "type": "folder" },
+      { "value": ".workbuddy", "type": "folder" },
+      { "value": "styles/design-system-v2.wxss", "type": "file" },
+      { "value": "styles/ui-components.wxss", "type": "file" },
       { "value": ".git", "type": "folder" },
       { "value": "node_modules", "type": "folder" },
       { "value": ".md", "type": "suffix" }

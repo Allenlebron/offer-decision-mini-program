@@ -10,13 +10,16 @@ const projectConfig = JSON.parse(
 
 assert.equal(projectConfig.compileType, "miniprogram");
 assert.equal(projectConfig.miniprogramRoot, "./");
-for (const folder of ["assets", "docs", "tests", "scripts", "writing-workspace", "image-cards", "node_modules"]) {
+for (const folder of ["assets", "docs", "tests", "scripts", "writing-workspace", "image-cards", ".workbuddy", "node_modules"]) {
   assert.ok(projectConfig.packOptions?.ignore.some((item) => item.type === "folder" && item.value === folder));
 }
 readFileSync(join(root, "images/share-entry.png"));
+readFileSync(join(root, "images/share-celebration.png"));
+readFileSync(join(root, "images/share-habits.png"));
 assert.deepEqual(appConfig.pages, [
-  "pages/home/home",
   "pages/habits/habits",
+  "pages/journal/journal",
+  "pages/home/home",
   "pages/decision/decision",
   "pages/decision-result/decision-result",
   "pages/about/about",
@@ -24,6 +27,11 @@ assert.deepEqual(appConfig.pages, [
   "pages/result/result",
   "pages/breakeven/breakeven",
 ]);
+assert.deepEqual(appConfig.tabBar.list.map((item) => item.pagePath), ["pages/habits/habits", "pages/home/home"]);
+for (const item of appConfig.tabBar.list) {
+  readFileSync(join(root, item.iconPath));
+  readFileSync(join(root, item.selectedIconPath));
+}
 
 for (const page of appConfig.pages) {
   for (const extension of ["js", "json", "wxml", "wxss"]) {

@@ -1,13 +1,14 @@
-<view class="habits-page">
-  <view class="page-title" role="heading" aria-level="1">照顾好自己的日常</view>
-  <text class="muted intro">喝水、睡好、动一动。按自己的节奏来。</text>
+<page-meta page-style="{{celebrationOpen ? 'overflow: hidden;' : ''}}" />
+<view class="habits-page" aria-hidden="{{celebrationOpen}}">
+  <view class="page-title" role="heading" aria-level="1">三件小事</view>
+  <text class="muted intro">薄肌 · 大水 · 大睡，把生活过得更有劲。</text>
   <view class="tabs">
-    <button class="tab {{tab === 'today' ? 'selected' : ''}}" data-tab="today" bindtap="switchTab" aria-pressed="{{tab === 'today'}}">记录</button>
+    <button class="tab {{tab === 'today' ? 'selected' : ''}}" data-tab="today" bindtap="switchTab" aria-pressed="{{tab === 'today'}}">今天</button>
     <button class="tab {{tab === 'history' ? 'selected' : ''}}" data-tab="history" bindtap="switchTab" aria-pressed="{{tab === 'history'}}">回顾</button>
-    <button class="tab {{tab === 'settings' ? 'selected' : ''}}" data-tab="settings" bindtap="switchTab" aria-pressed="{{tab === 'settings'}}">目标</button>
+    <button class="tab {{tab === 'settings' ? 'selected' : ''}}" data-tab="settings" bindtap="switchTab" aria-pressed="{{tab === 'settings'}}">我的节奏</button>
   </view>
   <view wx:if="{{error}}" class="feedback error" role="alert">{{error}}</view>
-  <view wx:elif="{{notice}}" class="feedback" role="status" aria-live="polite">{{notice}}</view>
+  <view wx:elif="{{notice}}" class="feedback feedback-{{feedbackKind}}" role="status" aria-live="polite">{{notice}}</view>
   <view wx:if="{{status !== 'ready'}}" class="blocked">
     <view class="section-title">{{status === 'corrupt' ? '记录暂时无法读取' : '本机存储暂不可用'}}</view>
     <text class="muted">原有数据未被覆盖，请先重试。</text>
@@ -15,58 +16,135 @@
     <button wx:if="{{status === 'corrupt'}}" class="text-button danger" bindtap="clearHabits">清除打卡数据后重新开始</button>
   </view>
   <block wx:else>
-    <view wx:if="{{tab !== 'settings'}}" class="date-row">
+    <view wx:if="{{tab === 'today'}}" class="date-row">
       <picker mode="date" value="{{selected}}" start="2000-01-01" end="{{today}}" bindchange="chooseDate"><view class="date-button" role="button" aria-label="选择记录日期">{{selected === today ? '今天' : selected}} <text class="muted">换一天⌄</text></view></picker>
       <button wx:if="{{selected !== today}}" class="text-button" bindtap="goToday">回到今天</button>
     </view>
     <block wx:if="{{tab === 'today'}}">
-      <view class="water-section">
-        <view class="section-heading"><text class="section-title">喝水</text><text class="muted">{{goals.water ? '自定目标 ' + goals.water + ' ml' : '按需饮水'}}</text></view>
-        <view class="water-number mono-data">{{stats.water}} <text>ml 已记录</text></view>
-        <progress wx:if="{{goals.water}}" percent="{{waterProgress}}" stroke-width="4" activeColor="#2463FF" backgroundColor="#D8E0EB" />
-        <view class="quick-water">
-          <button data-amount="150" bindtap="addWater">+150 ml</button><button data-amount="250" bindtap="addWater">+250 ml</button><button data-amount="500" bindtap="addWater">+500 ml</button>
+      <view class="daily-scene scene-{{scene.action}}">
+        <view class="scene-title">{{scene.title}}</view><text class="scene-copy">{{scene.copy}}</text>
+        <button class="scene-action" bindtap="actScene" hover-class="action-pressed">{{scene.label}}</button>
+        <text wx:if="{{scene.action === 'windDown'}}" class="scene-note">只记录准备休息，不会自动计算睡眠时长。</text>
+      </view>
+      <view id="habit-water" class="habit-block water-block">
+        <view class="section-heading"><view><text class="habit-name water-ink">大水</text><text class="habit-subtitle">顺手喝一杯</text></view><text class="habit-total mono-data">{{stats.water}} ml 已记录</text></view>
+        <view class="water-track" wx:if="{{goals.water}}" aria-hidden="true"><view class="water-fill" style="transform: scaleX({{rings[0].percent / 100}});"></view></view>
+        <text class="habit-hint">{{goals.water && stats.water >= goals.water ? '已达到自定目标，不必为进度额外喝水。' : '按需饮水，不必追求越来越多。'}}</text>
+        <button wx:if="{{scene.action !== 'water' || selected !== today}}" class="habit-action water-action" bindtap="addCup" hover-class="action-pressed">喝了一杯 · {{cup}} ml</button>
+        <view class="water-foot"><picker mode="selector" range="{{cups}}" value="{{cupIndex}}" bindchange="chooseCup"><view class="cup-choice" aria-role="button" aria-label="设置常用杯容量，当前{{cup}}毫升">常用杯 {{cup}} ml <text aria-hidden="true">⌄</text></view></picker><button class="text-button" data-key="water" bindtap="toggleDetail" aria-expanded="{{details.water}}">{{details.water ? '收起' : '调整 / 补记'}}</button></view>
+        <view wx:if="{{details.water}}" class="habit-editor">
+          <view class="quick-water"><button data-amount="150" bindtap="addWater">+150 ml</button><button data-amount="250" bindtap="addWater">+250 ml</button><button data-amount="500" bindtap="addWater">+500 ml</button></view>
+          <view class="input-action"><input type="number" value="{{waterInput}}" data-key="waterInput" bindinput="input" placeholder="其他容量（ml）" aria-label="其他饮水容量，毫升" maxlength="4" /><button class="small-action" bindtap="addWater">记录</button></view>
+          <view class="water-foot"><text class="muted">{{day.water.length}} 杯已记录</text><button class="text-button" disabled="{{!day.water.length}}" bindtap="undoWater">撤销一杯</button></view>
         </view>
-        <view class="input-action"><input type="number" value="{{waterInput}}" data-key="waterInput" bindinput="input" placeholder="其他容量（ml）" aria-label="其他饮水容量，毫升" maxlength="4" /><button class="small-action" bindtap="addWater">记录</button></view>
-        <view class="water-foot"><text class="muted">{{day.water.length}} 杯{{day.water.length ? ' · 最后一杯 ' + day.water[day.water.length - 1] + ' ml' : ''}}</text><button class="text-button" disabled="{{!day.water.length}}" bindtap="undoWater">撤销一杯</button></view>
       </view>
-      <view class="section">
-        <view class="section-heading"><text class="section-title">睡眠</text><text class="muted">{{goals.sleep ? '自定目标 ' + goals.sleep + ' 小时' : '起床后记一次'}}</text></view>
-        <text class="muted description">归到醒来的这一天；填写实际睡眠时长。</text>
-        <view class="input-action"><input type="digit" value="{{sleepInput}}" data-key="sleepInput" bindinput="input" placeholder="睡了几小时" aria-label="实际睡眠时长，小时" maxlength="5" /><button class="small-action" bindtap="saveSleep">{{day.sleep !== null ? '更新' : '保存'}}</button></view>
-        <view wx:if="{{day.sleep !== null}}" class="water-foot"><text class="muted">已记录 {{day.sleep}} 小时</text><button class="text-button" bindtap="removeSleep">删除记录</button></view>
+      <view id="habit-exercise" class="habit-block exercise-block">
+        <view class="section-heading"><view><text class="habit-name exercise-ink">薄肌</text><text class="habit-subtitle">练一点，也留给恢复</text></view></view>
+        <view class="training-week"><text class="mono-data">{{week.strengthDays}}<text class="training-unit">{{goals.strengthDays ? ' / ' + goals.strengthDays : ''}} 天</text></text><text class="habit-hint">本周力量训练 · {{week.strength}} 次记录</text></view>
+        <view class="day-plan"><button class="{{day.plan === 'train' ? 'plan-selected' : ''}}" data-plan="train" bindtap="planDay" aria-pressed="{{day.plan === 'train'}}">{{day.plan === 'train' ? '✓ ' : ''}}准备练一练</button><button class="{{day.plan === 'rest' ? 'plan-selected' : ''}}" data-plan="rest" bindtap="planDay" aria-pressed="{{day.plan === 'rest'}}">{{day.plan === 'rest' ? '✓ ' : ''}}留给恢复</button></view>
+        <text class="habit-hint">{{day.plan === 'rest' ? '恢复也是安排。已有运动照常保留，也可以补记。' : '同一天多次训练只算一个训练日，不用每天练。'}}</text>
+        <button class="habit-action exercise-action" data-key="exercise" bindtap="toggleDetail" aria-expanded="{{details.exercise}}">{{details.exercise ? '收起运动明细' : day.exercise.length ? '已记 ' + day.exercise.length + ' 次运动 · 查看 / 补记' : '完成运动，记一下'}}</button>
+        <view wx:if="{{details.exercise}}" class="habit-editor">
+          <picker mode="selector" range="{{types}}" value="{{typeIndex}}" bindchange="chooseType"><view class="picker-control" aria-role="button" aria-label="选择运动类型">{{types[typeIndex]}}<text class="muted">更换⌄</text></view></picker>
+          <view class="input-action"><input type="number" value="{{minutesInput}}" data-key="minutesInput" bindinput="input" placeholder="运动了几分钟" aria-label="运动时长，分钟" maxlength="3" /><button class="small-action" bindtap="addExercise">记录</button></view>
+          <view wx:for="{{day.exercise}}" wx:key="index" class="exercise-row"><text>{{item.type}} · {{item.minutes}} 分钟</text><button class="text-button" data-index="{{index}}" bindtap="removeExercise" aria-label="删除{{item.type}}{{item.minutes}}分钟记录">删除</button></view>
+        </view>
       </view>
-      <view class="section">
-        <view class="section-heading"><text class="section-title">运动</text><text class="muted">按周积累，休息也可以</text></view>
-        <view class="week-note">这周力量训练 <text class="strong">{{week.strength}}{{goals.strength ? ' / ' + goals.strength : ''}} 次</text></view>
-        <picker mode="selector" range="{{types}}" value="{{typeIndex}}" bindchange="chooseType"><view class="picker-control" role="button" aria-label="选择运动类型">{{types[typeIndex]}}<text class="muted">更换⌄</text></view></picker>
-        <view class="input-action"><input type="number" value="{{minutesInput}}" data-key="minutesInput" bindinput="input" placeholder="运动了几分钟" aria-label="运动时长，分钟" maxlength="3" /><button class="small-action" bindtap="addExercise">记录</button></view>
-        <view wx:for="{{day.exercise}}" wx:key="index" class="exercise-row"><text>{{item.type}} · {{item.minutes}} 分钟</text><button class="text-button" data-index="{{index}}" bindtap="removeExercise" aria-label="删除{{item.type}}{{item.minutes}}分钟记录">删除</button></view>
-        <text wx:if="{{!day.exercise.length}}" class="muted description">这天还没有运动记录。</text>
+      <view id="habit-sleep" class="habit-block sleep-block">
+        <view class="section-heading"><view><text class="habit-name sleep-ink">大睡</text><text class="habit-subtitle">给明天留点精神</text></view></view>
+        <view class="sleep-summary">{{day.sleep !== null ? '醒来这天，记下了 ' + day.sleep + ' 小时睡眠' : '昨晚睡得怎么样？照实记下就好。'}}</view>
+        <text wx:if="{{day.feeling}}" class="habit-hint">醒来后的感受 · {{day.feeling}}</text>
+        <button class="habit-action sleep-action" data-key="sleep" bindtap="toggleDetail" aria-expanded="{{details.sleep}}">{{details.sleep ? '收起' : day.sleep !== null ? '查看 / 更新睡眠' : '记下昨晚睡眠'}}</button>
+        <view wx:if="{{details.sleep}}" class="habit-editor">
+          <text class="habit-hint">归到醒来的日期；感受可选，不作健康评价。</text>
+          <view class="input-action"><input type="digit" value="{{sleepInput}}" data-key="sleepInput" bindinput="input" placeholder="实际睡了几小时" aria-label="实际睡眠时长，小时" maxlength="5" /><button class="small-action" bindtap="saveSleep">保存</button></view>
+          <picker mode="selector" range="{{feelings}}" value="{{feelingIndex}}" bindchange="chooseFeeling"><view class="feeling-choice" aria-role="button" aria-label="醒来后的感受，{{feelings[feelingIndex]}}"><text>醒来后的感受</text><text>{{feelings[feelingIndex]}} ⌄</text></view></picker>
+          <button wx:if="{{day.sleep !== null}}" class="text-button" bindtap="removeSleep">删除睡眠记录</button>
+        </view>
+        <view wx:if="{{selected === today}}" class="wind-down"><text class="habit-hint">{{day.windDown ? '已记下睡前准备。准备好了，就放下手机吧。' : '晚上准备休息时，给今天一个温柔的结束。'}}</text><button class="text-button" bindtap="windDown">{{day.windDown ? '撤销睡前准备' : '今天准备收尾了'}}</button></view>
+      </view>
+      <button wx:if="{{dailyComplete}}" class="achievement-entry" bindtap="openCelebration">今日自定目标已完成 <text>为自己开心一下 ›</text></button>
+      <button class="progress-toggle" bindtap="toggleProgress" aria-expanded="{{progressExpanded}}">{{progressExpanded ? '收起进度' : '看看我的进度'}} <text aria-hidden="true">{{progressExpanded ? '−' : '+'}}</text></button>
+      <view wx:if="{{progressExpanded}}" class="goal-overview">
+        <view class="section-heading"><text class="section-title">按自己的节奏</text><button class="text-button" data-tab="settings" bindtap="switchTab">调整目标 ›</button></view>
+        <view class="rings-layout">
+          <canvas wx:if="{{!celebrationOpen}}" type="2d" id="goal-rings" class="goal-rings" aria-hidden="true"></canvas>
+          <view wx:else class="goal-rings" aria-hidden="true"></view>
+          <view class="ring-legend">
+            <view wx:for="{{rings}}" wx:key="id" class="ring-detail">
+              <view class="ring-label"><view class="ring-dot" style="background: {{item.color}};"></view><text>{{item.label}}</text><text class="ring-period">{{item.period}}</text></view>
+              <view class="ring-value mono-data">{{item.valueText}}</view>
+              <text class="ring-status">{{item.status}}</text>
+            </view>
+          </view>
+        </view>
       </view>
     </block>
     <block wx:elif="{{tab === 'history'}}">
-      <view class="section-title">这一周</view><text class="muted description">{{week.start}} — {{week.end}} · 周一开始</text>
-      <view class="review-row"><text>力量训练</text><text>{{week.strength}}{{goals.strength ? ' / ' + goals.strength : ''}} 次</text></view>
-      <view class="review-row"><text>全部运动</text><text>{{week.minutes}} 分钟</text></view>
-      <view class="review-row"><text>记录饮水</text><text>{{week.waterDays}} 天</text></view>
-      <view class="review-row"><text>已记录的平均睡眠</text><text>{{week.sleepAverage}} 小时</text></view>
-      <text class="muted description">睡眠均值只包含已记录的 {{week.sleepDays}} 天。空白不算 0。</text>
-      <view class="section">
-        <view class="section-title">截至所选日期的 7 天</view><text class="muted description">点一天可查看或补记；其他日期可从上方选择。</text>
-        <view class="history-header muted"><text>日期</text><text>水 ml</text><text>睡眠 h</text><text>运动 min</text></view>
-        <button wx:for="{{recent}}" wx:key="date" class="history-row" data-date="{{item.date}}" bindtap="openDay" aria-label="查看{{item.date}}记录"><text>{{item.label}}</text><text>{{item.water || '—'}}</text><text>{{item.sleepText}}</text><text>{{item.minutes || '—'}}</text></button>
+      <view class="review-heading">
+        <view class="section-title">周概览</view>
+        <view class="review-actions">
+          <picker mode="date" value="{{selected}}" start="2000-01-01" end="{{today}}" bindchange="chooseDate"><view class="review-date" aria-role="button" aria-label="选择回顾日期，更新周概览与每日记录，当前{{selected}}">{{selected === today ? '今天' : stats.label}}<text aria-hidden="true">⌄</text></view></picker>
+          <button wx:if="{{selected !== today}}" class="text-button" bindtap="goToday">回到今天</button>
+        </view>
+      </view>
+      <text class="review-period">{{week.start}} — {{week.end}} · 周一至周日</text>
+      <view class="review-metrics">
+        <view class="review-metric"><text class="review-label">饮水记录</text><view class="review-value mono-data">{{week.waterDays}}<text class="review-unit">天</text></view></view>
+        <view class="review-metric"><text class="review-label">平均睡眠</text><view class="review-value mono-data">{{week.sleepAverage}}<text wx:if="{{week.sleepDays}}" class="review-unit">小时</text></view></view>
+        <view class="review-metric"><text class="review-label">力量训练日</text><view class="review-value mono-data">{{week.strengthDays}}<text class="review-unit">{{goals.strengthDays ? '/ ' + goals.strengthDays + ' 天' : '天'}}</text></view></view>
+        <view class="review-metric"><text class="review-label">运动累计</text><view class="review-value mono-data">{{week.minutes}}<text class="review-unit">分钟</text></view></view>
+      </view>
+      <text class="review-note">{{week.sleepDays ? '睡眠均值来自已记录的 ' + week.sleepDays + ' 天，未记录不计入。' : '这一周暂无睡眠记录，未记录不计作 0。'}}</text>
+      <button class="journal-entry" bindtap="openJournal"><view><text class="section-title">翻开我的生活周刊</text><text class="habit-hint">把这一周的小事，留成一页。</text></view><text aria-hidden="true">›</text></button>
+      <view class="history-section">
+        <view class="history-heading"><view class="section-title">每日记录</view><text wx:if="{{recentRecordedDays}}" class="history-count">{{recentRecordedDays}} 天有记录</text></view>
+        <text class="review-period">截至 {{selected}} 的 7 天</text>
+        <block wx:if="{{recentRecordedDays}}">
+          <button wx:for="{{recentEntries}}" wx:key="date" class="history-card" hover-class="history-card-hover" data-date="{{item.date}}" bindtap="openDay" aria-label="查看或补记{{item.date}}记录">
+            <view class="history-heading"><view class="history-date"><text>{{item.label}}</text><text class="history-weekday">{{item.weekday}}</text></view><text class="history-link">查看 / 补记 <text aria-hidden="true">›</text></text></view>
+            <view class="history-metrics">
+              <view class="history-metric history-water"><text class="history-label">饮水</text><view wx:if="{{item.waterCount}}" class="history-value mono-data">{{item.water}}<text class="history-unit">ml</text></view><text wx:else class="history-unset">未记录</text><text wx:if="{{item.waterCount}}" class="history-detail">{{item.waterCount}} 杯已记录</text></view>
+              <view class="history-metric history-sleep"><text class="history-label">睡眠</text><view wx:if="{{item.sleep !== null}}" class="history-value mono-data">{{item.sleepText}}<text class="history-unit">小时</text></view><text wx:else class="history-unset">未记录</text></view>
+              <view class="history-metric history-exercise"><text class="history-label">运动</text><view wx:if="{{item.exercise.length}}" class="history-value mono-data">{{item.minutes}}<text class="history-unit">分钟</text></view><text wx:else class="history-unset">未记录</text><text wx:if="{{item.exercise.length}}" class="history-detail">{{item.exercise.length}} 次运动</text></view>
+            </view>
+            <view wx:if="{{item.exercise.length}}" class="history-activities"><text wx:for="{{item.exercise}}" wx:for-item="activity" wx:key="index">{{activity.type}} {{activity.minutes}} 分钟</text></view>
+          </button>
+          <picker wx:if="{{recent.length > recentRecordedDays}}" mode="date" value="{{selected}}" start="{{recent[recent.length - 1].date}}" end="{{selected}}" bindchange="openDay"><view class="history-fill" aria-role="button" aria-label="近七天还有{{recent.length - recentRecordedDays}}天未记录，选择日期补记"><text>另有 {{recent.length - recentRecordedDays}} 天未记录</text><text class="history-link">选择日期补记 <text aria-hidden="true">›</text></text></view></picker>
+        </block>
+        <view wx:else class="history-empty"><view class="history-empty-title">这七天，还没有记录</view><text class="review-note">从一杯水、一次好眠开始，慢慢积累。</text><button class="secondary" data-date="{{selected}}" bindtap="openDay">{{selected === today ? '记录今天' : '记录这一天'}}</button></view>
       </view>
     </block>
     <block wx:else>
       <view class="section-title">设定自己的节奏</view>
-      <text class="muted description">目标可留空，照常记录。这些数字只用于个人进度展示。</text>
-      <view class="goal-field"><label for="water-goal">每天饮水 · ml</label><input id="water-goal" type="number" value="{{goalsForm.water}}" data-key="water" bindinput="goalInput" placeholder="不设置可留空" maxlength="5" /></view>
-      <view class="goal-field"><label for="sleep-goal">每天睡眠 · 小时</label><input id="sleep-goal" type="digit" value="{{goalsForm.sleep}}" data-key="sleep" bindinput="goalInput" placeholder="不设置可留空" maxlength="5" /></view>
-      <view class="goal-field"><label for="strength-goal">每周力量训练 · 次</label><input id="strength-goal" type="number" value="{{goalsForm.strength}}" data-key="strength" bindinput="goalInput" placeholder="不设置可留空" maxlength="2" /></view>
+      <text class="muted description">按自己的节奏选择，也可以不设目标。</text>
+      <text wx:if="{{goals.strength && goals.strengthDays === undefined}}" class="review-note">原每周 {{goals.strength}} 次目标未被换算；现在按训练天数展示，请重新确认。旧记录照常保留。</text>
+      <view class="goal-fields">
+        <picker wx:for="{{goalFields}}" wx:key="key" mode="selector" range="{{item.options}}" range-key="label" value="{{item.index}}" data-key="{{item.key}}" bindchange="chooseGoal" aria-label="{{item.label}}，{{item.options[item.index].label}}，选择目标">
+          <view class="goal-field"><text>{{item.label}}</text><view class="goal-choice"><text>{{item.options[item.index].label}}</text><text class="goal-chevron" aria-hidden="true">⌄</text></view></view>
+        </picker>
+      </view>
       <button class="primary" bindtap="saveGoals">保存目标</button>
+      <text class="review-note">三个名字是生活主张，不是健康评分。薄肌不限定身材；饮水按需，睡眠也关注感受。身体情况特殊时，目标请遵医嘱调整。</text>
       <view class="section"><view class="section-title">我的记录</view><text class="muted description">记录只在本机保存。换手机或清理微信数据可能丢失；可复制 JSON 到自己的文件中留存。</text><button class="secondary" bindtap="exportData">复制记录 JSON</button><button class="text-button danger" bindtap="clearHabits">清除日常打卡数据</button></view>
     </block>
     <view class="footer"><text class="muted">本机保存 · 不上传</text><button class="text-button" bindtap="openAbout">来源与隐私</button></view>
   </block>
+</view>
+<view wx:if="{{celebrationOpen}}" class="celebration-backdrop" bindtap="closeCelebration" catchtouchmove="keepCelebrationOpen">
+  <view class="celebration-dialog" role="dialog" aria-modal="true" aria-label="今日目标已达成" catchtap="keepCelebrationOpen">
+    <button class="celebration-close" aria-label="关闭庆祝弹框" bindtap="closeCelebration">×</button>
+    <view class="celebration-confetti" aria-hidden="true">
+      <view wx:for="{{confetti}}" wx:key="index" class="celebration-piece" style="left: {{item.left}}%; --drift: {{item.drift}}px; --rotate: {{item.rotate}}deg; animation-delay: {{item.delay}}ms; background: {{item.color}};"></view>
+    </view>
+    <text class="celebration-date">{{celebrationDate}}</text>
+    <view class="celebration-medal" aria-hidden="true"><view class="medal-orbit"></view><view class="medal-core"><view class="medal-check"></view></view><view class="medal-spark spark-one"></view><view class="medal-spark spark-two"></view><view class="medal-spark spark-three"></view></view>
+    <view class="celebration-title" role="heading" aria-level="2">今天的小目标，<view>都完成了。</view></view>
+    <text class="celebration-copy">这一刻，值得为自己开心。</text>
+    <view class="celebration-results">
+      <view wx:for="{{celebrationGoals}}" wx:key="id" class="celebration-result"><view class="celebration-goal"><text>{{item.label}}</text><text class="celebration-value mono-data">{{item.valueText}}</text></view><text class="celebration-tick" aria-label="已达成">✓</text></view>
+    </view>
+    <button class="celebration-share" open-type="share">分享这份好心情</button>
+    <button class="celebration-done" bindtap="closeCelebration">收下这份鼓励</button>
+  </view>
 </view>

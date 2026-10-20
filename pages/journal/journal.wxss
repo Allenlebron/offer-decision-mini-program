@@ -1,0 +1,23 @@
+.journal-page { max-width: 600px; margin: 0 auto; padding: 24px 20px calc(32px + env(safe-area-inset-bottom)); color: #101827; }
+.journal-sheet { padding: 24px; background: #fff; }
+.journal-masthead { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding-bottom: 16px; border-bottom: 1px solid #DCE3EE; color: #526178; font-size: 12px; }
+.journal-period { display: block; margin-top: 24px; color: #526178; font-size: 12px; font-variant-numeric: tabular-nums; }
+.journal-title { margin-top: 20px; font-size: 28px; font-weight: 650; line-height: 1.5; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.journal-intro { display: block; margin: 16px 0 24px; color: #526178; font-size: 14px; line-height: 1.8; }
+.journal-fact { padding: 16px 0; border-top: 1px solid #E7ECF4; font-size: 15px; line-height: 1.8; }
+.journal-signature { margin-top: 24px; color: #2155CF; font-size: 14px; font-weight: 600; }
+.journal-signature text { display: block; margin-top: 8px; color: #526178; font-size: 12px; font-weight: 400; }
+.share-settings { margin-top: 28px; }
+.share-title { font-size: 17px; font-weight: 600; }
+.share-choice { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-height: 56px; padding: 4px 0; border-bottom: 1px solid #DCE3EE; font-size: 14px; }
+.share-choice text:last-child { color: #2155CF; }
+.share-note { display: block; margin-top: 12px; color: #526178; font-size: 12px; line-height: 1.8; }
+.journal-page button { box-sizing: border-box; width: 100%; min-height: 48px; margin: 16px 0 0; padding: 12px 16px; border-radius: 8px; font-size: 15px; line-height: 1.6; }
+.preview-button { color: #2155CF; background: #EAF0FF; }
+.share-button { color: #fff; background: #2463FF; }
+.journal-page button[disabled] { color: #526178; background: #E7ECF4; }
+.share-preview { display: block; width: 100%; margin-top: 12px; }
+.journal-error { margin-top: 16px; color: #A12F39; font-size: 14px; line-height: 1.8; }
+.journal-error text { display: block; }
+.poster-canvas { position: fixed; left: -1100px; top: 0; width: 1000px; height: 800px; pointer-events: none; }
+@media (max-width: 360px) { .journal-page { padding-left: 16px; padding-right: 16px; } .journal-sheet { padding: 20px; } .journal-title { font-size: 26px; } }

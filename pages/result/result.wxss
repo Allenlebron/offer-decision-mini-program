@@ -226,6 +226,8 @@
   color: var(--text-on-dark);
   font-size: 15px;
   font-weight: 650;
+  box-shadow: var(--shadow-accent);
+  transition: transform var(--transition-fast);
 }
 
 .break-even-button > text:last-child {

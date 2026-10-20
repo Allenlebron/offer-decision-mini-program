@@ -1,31 +1,61 @@
 page {
-  --surface-light: #f4f7fc;
+  /* ===== v2 背景色 ===== */
+  --surface-page: #f8fafc;
+  --surface-light: #f8fafc; /* 兼容旧名 */
   --surface-raised: #ffffff;
   --surface-muted: #edf1f7;
-  --surface-dark: #071426;
+  --surface-dark: #061426;
   --surface-panel: #0b1b30;
   --surface-panel-soft: #10233c;
-  --text-primary: #101827;
-  --text-secondary: #526178;
-  --text-placeholder: #66748a;
+
+  /* ===== v2 文字色 ===== */
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-placeholder: #94a3b8;
   --text-on-dark: #f7f9fc;
-  --text-muted-dark: #a8b6ca;
+  --text-muted-dark: #94a3b8;
+
+  /* ===== v2 品牌色 ===== */
   --accent: #2463ff;
   --accent-strong: #1553e8;
   --accent-soft: #dce7ff;
   --accent-secondary: #75a5ff;
+  --accent-glow: rgba(36, 99, 255, 0.12);
+  --accent-gradient: linear-gradient(135deg, #2463ff 0%, #1d4ed8 100%);
+
+  /* ===== v2 功能色 ===== */
   --attention: #ffb54a;
-  --attention-text: #172033;
-  --danger: #a12f39;
+  --attention-light: #fff4e0;
+  --attention-text: #1e293b;
+  --success: #34d399;
+  --success-light: #ecfdf5;
+  --danger: #dc2626;
+  --danger-light: #fef2f2;
   --danger-on-dark: #ff8f96;
-  --surface-error: #fff1f2;
-  --surface-error-soft: #fff8f8;
-  --border-error: #e8bec2;
-  --border-success: #527ac2;
-  --border-light: #d8e0eb;
+  --surface-error: #fef2f2;
+  --surface-error-soft: #fffbfb;
+  --border-error: #fecaca;
+  --border-success: #6ee7b7;
+
+  /* ===== v2 边框色 ===== */
+  --border-light: #e2e8f0;
+  --border-medium: #cbd5e1;
   --border-dark: #29405f;
+  --border-success-dark: #527ac2;
+
+  /* ===== v2 阴影 ===== */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-accent: 0 8px 20px rgba(36, 99, 255, 0.28);
+
+  /* ===== v2 动效 ===== */
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 300ms ease-out;
+
   min-height: 100%;
-  background: var(--surface-light);
+  background: var(--surface-page);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
   font-size: 16px;

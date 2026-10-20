@@ -1,18 +1,18 @@
 <view class="decision-shell home-page">
   <view class="home-heading" role="heading" aria-level="1">算清楚，再决定。</view>
   <view class="home-intro">关于工作，也关于生活。</view>
-  <button class="habits-entry" bindtap="openHabits" hover-class="entry-pressed"><view class="entry-copy"><view class="entry-heading">日常打卡</view><view class="entry-description">喝水、睡眠、运动，随手记一下。</view></view><text class="entry-arrow" aria-hidden="true">›</text></button>
   <button wx:if="{{entries.length}}" class="offer-entry" data-id="offer" bindtap="openScenario" hover-class="offer-pressed" aria-label="Offer 对比，{{entries[0].saved ? '继续填写' : '开始对比'}}">
-    <view class="offer-label">Offer 对比</view>
+    <view class="offer-label">主力工具 · Offer 对比</view>
     <view class="offer-title"><view>换一份工作，</view><view>真的涨薪了吗？</view></view>
     <view class="offer-description">收入、公积金、工时，一起算。</view>
-    <view class="offer-bottom"><text>{{entries[0].saved ? '继续填写' : '开始对比'}}</text><text class="offer-arrow" aria-hidden="true">↗</text></view>
+    <view class="offer-bottom"><text>{{entries[0].saved ? '继续填写' : '开始对比'}}</text><text class="offer-arrow" aria-hidden="true">→</text></view>
   </button>
   <view class="other-heading" role="heading" aria-level="2">生活里的其他选择</view>
   <view class="scenario-list">
     <block wx:for="{{entries}}" wx:key="id">
       <button wx:if="{{item.id !== 'offer'}}" class="scenario-entry" data-id="{{item.id}}" bindtap="openScenario" hover-class="entry-pressed" aria-label="{{item.title}}，{{item.saved ? '继续填写' : '开始计算'}}">
-        <view class="entry-copy"><view class="entry-heading">{{item.id === 'rent' ? '租房与通勤' : '空窗期预算'}}</view><view class="entry-description">{{item.id === 'rent' ? '多花的房租，换回多少时间？' : '暂时不工作，存款能撑多久？'}}</view><text wx:if="{{item.saved}}" class="draft-note">有草稿 · 继续填写</text></view>
+        <view class="entry-icon {{item.id === 'rent' ? 'entry-icon-rent' : 'entry-icon-budget'}}" aria-hidden="true">{{item.id === 'rent' ? '🏠' : '📊'}}</view>
+        <view class="entry-copy"><view class="entry-heading">{{item.id === 'rent' ? '租房与通勤' : '空窗期预算'}}</view><view class="entry-description">{{item.id === 'rent' ? '多花的房租，换回多少时间？' : '暂时不工作，存款能撑多久？'}}</view><text wx:if="{{item.saved}}" class="draft-note">● 有草稿 · 继续填写</text></view>
         <text class="entry-arrow" aria-hidden="true">›</text>
       </button>
     </block>

@@ -1,7 +1,8 @@
 {
   "pages": [
-    "pages/home/home",
     "pages/habits/habits",
+    "pages/journal/journal",
+    "pages/home/home",
     "pages/decision/decision",
     "pages/decision-result/decision-result",
     "pages/about/about",
@@ -13,8 +14,18 @@
     "navigationBarTitleText": "真涨薪",
     "navigationBarBackgroundColor": "#061426",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#F4F7FC",
+    "backgroundColor": "#F8FAFC",
     "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#526178",
+    "selectedColor": "#2463FF",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/habits/habits", "text": "日常", "iconPath": "images/tab-daily.png", "selectedIconPath": "images/tab-daily-selected.png" },
+      { "pagePath": "pages/home/home", "text": "决策", "iconPath": "images/tab-decisions.png", "selectedIconPath": "images/tab-decisions-selected.png" }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",

@@ -4,15 +4,19 @@ const SHARE_IMAGE = "/images/share-entry.png";
 
 function scenarioShare(scenario) {
   const entries = {
-    habits: { title: "喝水、睡眠、运动，按自己的节奏记录", path: "/pages/habits/habits" },
+    habits: { title: "薄肌、大水、大睡，把生活过得更有劲", path: "/pages/habits/habits", imageUrl: "/images/share-habits.png" },
     rent: { title: "住近一点值不值？算算房租与通勤", path: "/pages/decision/decision?scenario=rent" },
     budget: { title: "暂时不工作，现有预算能覆盖多久？", path: "/pages/decision/decision?scenario=budget" },
   };
-  return { ...(entries[scenario] || { title: "真涨薪｜算清工作与生活的取舍", path: "/pages/home/home" }), imageUrl: SHARE_IMAGE };
+  return { imageUrl: SHARE_IMAGE, ...(entries[scenario] || { title: "真涨薪｜算清工作与生活的取舍", path: "/pages/home/home" }) };
 }
 
 function buildSharePath(source) {
   return `${SHARE_ENTRY_PATH}?source=${encodeURIComponent(source)}`;
+}
+
+function celebrationShare() {
+  return { title: "今天的小目标完成了，一起照顾好自己", path: "/pages/habits/habits", imageUrl: "/images/share-celebration.png" };
 }
 
 function enableShareMenu() {
@@ -28,4 +32,5 @@ module.exports = {
   OFFER_SHARE_TITLE,
   SHARE_IMAGE,
   scenarioShare,
+  celebrationShare,
 };

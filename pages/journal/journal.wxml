@@ -1,0 +1,24 @@
+<view class="journal-page">
+  <view wx:if="{{status !== 'ready'}}" class="journal-error"><view>记录暂时无法读取</view><text>原有数据未被覆盖。</text><button bindtap="load">重新读取</button></view>
+  <block wx:else>
+    <view class="journal-sheet">
+      <view class="journal-masthead"><text>三件小事 / 生活周刊</text><text>本机记录</text></view>
+      <text class="journal-period">{{journal.start}} — {{journal.end}}</text>
+      <view class="journal-title">这一周，<view>{{titles[titleIndex]}}。</view></view>
+      <text class="journal-intro">{{journal.recordedDays ? '有 ' + journal.recordedDays + ' 天，你留下了日常的小片段。' : '还没有实际记录。从一件小事开始，就很好。'}}</text>
+      <view wx:for="{{journal.facts}}" wx:key="index" class="journal-fact">{{item}}</view>
+      <view class="journal-signature">薄肌 · 大水 · 大睡<text>记录生活，不给健康打分。</text></view>
+    </view>
+    <view class="share-settings">
+      <view class="share-title">留一页，也可以分享一页</view>
+      <picker mode="selector" range="{{titles}}" value="{{titleIndex}}" bindchange="chooseTitle"><view class="share-choice" aria-role="button" aria-label="选择封面心情，当前{{titles[titleIndex]}}"><text>封面心情</text><text>{{titles[titleIndex]}} ⌄</text></view></picker>
+      <view class="share-choice"><text>分享卡包含本周记录</text><switch checked="{{includeFacts}}" color="#2463FF" bindchange="chooseFacts" aria-label="分享卡包含个人本周记录，默认关闭" /></view>
+      <text class="share-note">默认只分享生活态度，不带个人数值。开启后，仅在你预览并主动分享时发送图片；接收者无法读取你的本机记录。</text>
+      <button class="preview-button" bindtap="createPreview" loading="{{generating}}" disabled="{{generating}}">{{preview ? '重新生成分享预览' : '生成分享预览'}}</button>
+      <view wx:if="{{error}}" class="journal-error" role="alert">{{error}}</view>
+      <block wx:if="{{preview}}"><text class="share-note">将分享下方这张图片，请确认内容。</text><image class="share-preview" src="{{preview}}" mode="widthFix" aria-label="即将分享的生活周刊图片" /><button class="share-button" open-type="share">确认，分享这一页</button></block>
+    </view>
+    <text class="share-note">仅按填写记录汇总，空白不算 0。不推断作息规律、身体变化或健康效果。</text>
+    <canvas type="2d" id="journal-canvas" class="poster-canvas" aria-hidden="true"></canvas>
+  </block>
+</view>

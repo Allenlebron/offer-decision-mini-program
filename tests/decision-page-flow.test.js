@@ -37,7 +37,7 @@ function harness() {
 }
 const input = (page, key, value) => page.onInput({ currentTarget: { dataset: { key } }, detail: { value } });
 
-test("home exposes three real routes and independent draft indicators", () => {
+test("decision tab exposes three real routes and independent draft indicators", () => {
   const h = harness();
   saveDraft("budget", EXAMPLES.budget, true, 0);
   const home = h.load("home");
