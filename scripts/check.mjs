@@ -22,6 +22,7 @@ assert.deepEqual(appConfig.pages, [
   "pages/home/home",
   "pages/decision/decision",
   "pages/decision-result/decision-result",
+  "pages/decision-check/decision-check",
   "pages/about/about",
   "pages/calculator/calculator",
   "pages/result/result",
@@ -62,8 +63,9 @@ const calculatorTemplate = readFileSync(
 const homeTemplate = readFileSync(join(root, "pages/home/home.wxml"), "utf8");
 assert.match(homeTemplate, /class="offer-entry"/);
 assert.match(homeTemplate, /data-id="offer"/);
-assert.match(homeTemplate, /租房与通勤/);
-assert.match(homeTemplate, /空窗期预算/);
+assert.match(homeTemplate, /item.entryTitle/);
+const scenarios = readFileSync(join(root, "utils/decision-data.js"), "utf8");
+for (const title of ["租房与通勤", "空窗期预算", "学习投入", "消费选择", "换城市生活", "副业尝试"]) assert.ok(scenarios.includes(title));
 assert.doesNotMatch(homeTemplate, /<br\s*\//);
 assert.match(calculatorTemplate, /aria-label=/);
 assert.match(calculatorTemplate, /field-error/);

@@ -1,0 +1,30 @@
+<view class="decision-shell check-page">
+  <view class="decision-local">本机保存 · 不上传</view>
+  <view class="check-title" role="heading" aria-level="1">算完数字，再看生活。</view>
+  <view class="check-intro">四个问题，帮你把还没问清的条件找出来。</view>
+  <picker range="{{topics}}" value="{{topicIndex}}" bindchange="changeTopic" aria-label="选择核对场景，当前{{topics[topicIndex]}}">
+    <view class="topic-picker"><text>{{topics[topicIndex]}}</text><text class="picker-hint">切换场景 ⌄</text></view>
+  </picker>
+  <view class="check-progress" role="status">已核对 {{checked}} 项<text wx:if="{{skipped}}"> · 不适用 {{skipped}} 项</text><text> · 共 {{items.length}} 项</text></view>
+  <view class="check-note">已核对不等于没有风险。每场景保留一轮，条件变化时请重新核对。</view>
+  <view wx:if="{{notice}}" class="decision-notice" role="alert">{{notice}}</view>
+  <view class="check-list">
+    <view wx:for="{{items}}" wx:key="id" class="check-item">
+      <view class="check-question" role="heading" aria-level="2">{{item.title}}</view>
+      <view class="check-action">{{item.action}}</view>
+      <view class="check-reference">参考主题 · {{item.reference}}</view>
+      <picker range="{{statuses}}" value="{{item.status}}" data-id="{{item.id}}" bindchange="changeStatus" aria-label="{{item.title}}，{{statuses[item.status]}}，更改核对状态">
+        <view class="status-picker {{item.status === 1 ? 'status-checked' : ''}}"><text>{{item.status === 1 ? '✓ ' : ''}}{{statuses[item.status]}}</text><text aria-hidden="true">⌄</text></view>
+      </picker>
+    </view>
+  </view>
+  <button class="decision-primary" bindtap="openTool" hover-class="decision-pressed">{{tool}}</button>
+  <button wx:if="{{scenario === 'budget'}}" class="decision-link" bindtap="openHabits" hover-class="decision-pressed">去日常，安排好这一周</button>
+  <button class="decision-link check-reset" bindtap="startAgain" hover-class="decision-pressed">开始新一轮核对</button>
+  <view class="check-source">
+    <view class="check-source-title">参考与改写说明</view>
+    <view>参考《{{source.title}}》· {{source.author}} 的《{{source.articleTitle}}》，正文授权 {{source.licenseName}}。以上问题与行动提示由本产品重新编写，未移植研究数字、政策待遇或法律结论；不代替专业意见。</view>
+    <view>{{source.versionLabel}}</view>
+    <view class="check-links"><button class="decision-link" bindtap="copySource" hover-class="decision-pressed">复制原文链接</button><button class="decision-link" bindtap="openAbout" hover-class="decision-pressed">来源与隐私</button></view>
+  </view>
+</view>

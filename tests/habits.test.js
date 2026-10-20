@@ -13,6 +13,7 @@ function harness() {
     setClipboardData: (options) => { calls.copied.push(options.data); options.success?.(); },
     navigateTo: ({ url }) => calls.routes.push(url),
     env: { USER_DATA_PATH: "wxfile://usr" }, getFileSystemManager: () => ({ copyFile() {} }),
+    getWindowInfo: () => ({ windowHeight: 720 }),
     hideKeyboard() {}, hideTabBar: () => { calls.tabHidden = true; }, showTabBar: () => { calls.tabHidden = false; } };
   const load = (name = "habits") => {
     let definition; global.Page = (value) => { definition = value; };
@@ -298,4 +299,61 @@ test("celebration dialog uses real data, restores tabs and shares only a fixed p
   assert.equal(page.data.celebrationOpen, false);
   h.storage.set(HABITS_KEY, { invalid: true }); page.load(); page.openCelebration();
   assert.equal(page.data.celebrationOpen, false);
+});
+
+test("celebration includes all today's exercise and separately reports weekly strength days", () => {
+  const h = harness(); const today = dateKey(); let state = empty();
+  state.goals.water = 250; state.goals.strengthDays = 2;
+  state = updateDay(state, today, "water", 500);
+  for (const [type, minutes] of [["力量训练", 20], ["力量训练", 15], ["篮球", 45], ["游泳", 30]]) {
+    state = updateDay(state, today, "exercise", { type, minutes });
+  }
+  h.storage.set(HABITS_KEY, state); const before = structuredClone(state);
+  const page = h.load(); page.openCelebration();
+  assert.equal(page.data.celebrationExercise.minutes, 110);
+  assert.equal(page.data.celebrationExercise.detail, "力量训练 35 分钟 · 篮球 45 分钟 · 游泳 30 分钟");
+  assert.equal(page.data.celebrationExercise.strengthText, "1 / 2 天");
+  assert.equal(page.data.celebrationExercise.strengthStatus, "按周积累");
+  assert.equal(page.data.dailyComplete, true);
+  assert.deepEqual(page.data.celebrationGoals.map((item) => item.id), ["water"]);
+  assert.deepEqual(h.storage.get(HABITS_KEY), before);
+  assert.doesNotMatch(JSON.stringify(page.onShareAppMessage({ from: "button" })), /110|35|45|30|篮球|游泳/);
+});
+
+test("celebration distinguishes no exercise, recovery plan and unset or legacy weekly targets", () => {
+  const h = harness(); const today = dateKey(); let state = empty();
+  state.goals.water = 250; state.goals.strength = 2;
+  state = updateDay(state, today, "water", 250);
+  state = updateDay(state, today, "plan", "rest");
+  h.storage.set(HABITS_KEY, state); const page = h.load(); page.openCelebration();
+  assert.equal(page.data.celebrationOpen, true);
+  assert.equal(page.data.celebrationExercise.minutes, 0); assert.equal(page.data.celebrationExercise.detail, "");
+  assert.equal(page.data.celebrationExercise.restPlanned, true);
+  assert.equal(page.data.celebrationExercise.strengthText, "0 天");
+  assert.equal(page.data.celebrationExercise.strengthStatus, "未设周目标");
+});
+
+test("celebration refreshes exercise after edits and reports completed weekly targets without daily requirements", () => {
+  const h = harness(); const today = dateKey(); let state = empty(); state.goals.water = 250; state.goals.strengthDays = 1;
+  state = updateDay(state, today, "water", 250);
+  state = updateDay(state, today, "exercise", { type: "力量训练", minutes: 20 });
+  state = updateDay(state, shiftDate(monday(today), -1), "exercise", { type: "力量训练", minutes: 60 });
+  h.storage.set(HABITS_KEY, state); const page = h.load(); page.openCelebration();
+  assert.equal(page.data.celebrationExercise.strengthStatus, "周目标已达成");
+  assert.equal(page.data.celebrationExercise.strengthText, "1 / 1 天");
+  assert.equal(page.data.celebrationExercise.minutes, 20);
+  page.closeCelebration(); h.modals.push({ confirm: true }); page.removeExercise({ currentTarget: { dataset: { index: 0 } } });
+  page.openCelebration(); assert.equal(page.data.celebrationOpen, true);
+  assert.equal(page.data.celebrationExercise.minutes, 0);
+  assert.equal(page.data.celebrationExercise.strengthStatus, "按周积累");
+});
+
+test("celebration sizes a native scroll area for short viewports and leaves sharing unchanged", () => {
+  const h = harness(); let state = empty(); state.goals.water = 250; state = updateDay(state, dateKey(), "water", 250);
+  h.storage.set(HABITS_KEY, state); const page = h.load();
+  wx.getWindowInfo = () => ({ windowHeight: 464 }); page.openCelebration();
+  assert.equal(page.data.celebrationScrollHeight, 264);
+  page.closeCelebration(); wx.getWindowInfo = () => ({ windowHeight: 900 }); page.openCelebration();
+  assert.equal(page.data.celebrationScrollHeight, 448);
+  assert.equal(page.onShareAppMessage({ from: "button" }).imageUrl, "/images/share-celebration.png");
 });

@@ -3,6 +3,7 @@ const test = require("node:test");
 const { EXAMPLES, createDraft } = require("../utils/decision-data");
 const { KEYS, readDraft, saveDraft, clearDraft, clearAllData } = require("../utils/decision-storage");
 const { DRAFT_KEY, RESULT_KEY, OFFER_META_KEY } = require("../utils/storage");
+const { CHECK_KEYS } = require("../utils/decision-checks");
 
 function setup() {
   const data = new Map();
@@ -51,7 +52,7 @@ test("storage failures are explicit and calculations are not a storage concern",
 
 test("clear all removes only product keys, including legacy data", () => {
   const data = setup();
-  for (const key of [DRAFT_KEY, RESULT_KEY, OFFER_META_KEY, KEYS.rent, KEYS.budget, "unrelated"]) data.set(key, true);
+  for (const key of [DRAFT_KEY, RESULT_KEY, OFFER_META_KEY, ...Object.values(KEYS), ...Object.values(CHECK_KEYS), "unrelated"]) data.set(key, true);
   assert.equal(clearAllData(), true);
   assert.deepEqual([...data.keys()], ["unrelated"]);
 });

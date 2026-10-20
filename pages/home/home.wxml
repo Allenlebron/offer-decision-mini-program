@@ -11,12 +11,15 @@
   <view class="scenario-list">
     <block wx:for="{{entries}}" wx:key="id">
       <button wx:if="{{item.id !== 'offer'}}" class="scenario-entry" data-id="{{item.id}}" bindtap="openScenario" hover-class="entry-pressed" aria-label="{{item.title}}，{{item.saved ? '继续填写' : '开始计算'}}">
-        <view class="entry-icon {{item.id === 'rent' ? 'entry-icon-rent' : 'entry-icon-budget'}}" aria-hidden="true">{{item.id === 'rent' ? '🏠' : '📊'}}</view>
-        <view class="entry-copy"><view class="entry-heading">{{item.id === 'rent' ? '租房与通勤' : '空窗期预算'}}</view><view class="entry-description">{{item.id === 'rent' ? '多花的房租，换回多少时间？' : '暂时不工作，存款能撑多久？'}}</view><text wx:if="{{item.saved}}" class="draft-note">● 有草稿 · 继续填写</text></view>
+        <view class="entry-icon entry-icon-{{item.id}}" aria-hidden="true"><text wx:if="{{item.id === 'rent' || item.id === 'budget'}}">{{item.id === 'rent' ? '🏠' : '📊'}}</text><view wx:else class="entry-symbol symbol-{{item.id}}"></view></view>
+        <view class="entry-copy"><view class="entry-heading">{{item.entryTitle}}</view><view class="entry-description">{{item.description}}</view><text wx:if="{{item.saved}}" class="draft-note">● 有草稿 · 继续填写</text></view>
         <text class="entry-arrow" aria-hidden="true">›</text>
       </button>
     </block>
   </view>
+  <button class="check-entry" bindtap="openChecks" hover-class="entry-pressed">
+    <view><view class="entry-heading">决定前，查漏一遍</view><view class="entry-description">钱和时间算完了，生活与退路呢？</view></view><text class="entry-arrow" aria-hidden="true">›</text>
+  </button>
   <view class="home-footer">
     <text class="privacy-note">本机计算，不上传</text>
     <button class="about-link" bindtap="openAbout" hover-class="entry-pressed">来源与隐私 <text aria-hidden="true">›</text></button>

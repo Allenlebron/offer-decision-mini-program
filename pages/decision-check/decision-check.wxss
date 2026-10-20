@@ -1,0 +1,20 @@
+@import "../../styles/decision.wxss";
+.check-page { --text-secondary: #526178; --text-muted: #526178; }
+.check-title { margin-top: 16px; font-size: 26px; line-height: 1.35; font-weight: 650; letter-spacing: -0.02em; }
+.check-intro { margin-top: 10px; color: var(--text-secondary); font-size: 15px; line-height: 1.6; }
+.topic-picker { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; margin-top: 24px; padding: 0 16px; border-radius: 8px; background: var(--surface-muted); font-size: 17px; font-weight: 650; }
+.picker-hint { flex: none; color: var(--text-secondary); font-size: 14px; font-weight: 400; }
+.check-progress { margin-top: 20px; font-size: 14px; font-weight: 600; }
+.check-note { margin-top: 8px; color: var(--text-secondary); font-size: 13px; line-height: 1.65; }
+.check-list { margin-top: 20px; margin-bottom: 24px; }
+.check-item { padding: 22px 0; border-top: 1px solid var(--border-light); }
+.check-question { font-size: 17px; font-weight: 650; line-height: 1.5; }
+.check-action { margin-top: 10px; font-size: 15px; line-height: 1.7; }
+.check-reference { margin-top: 10px; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.status-picker { display: flex; align-items: center; justify-content: space-between; gap: 16px; box-sizing: border-box; min-height: 48px; margin-top: 14px; padding: 10px 14px; border-radius: 8px; background: var(--surface-muted); color: var(--text-secondary); font-size: 14px; }
+.status-checked { background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
+.check-reset { margin-top: 8px; }
+.check-source { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-light); color: var(--text-secondary); font-size: 12px; line-height: 1.75; }
+.check-source-title { margin-bottom: 8px; font-size: 14px; font-weight: 650; }
+.check-links { display: flex; flex-wrap: wrap; margin-top: 8px; }
+.check-links .decision-link { padding-left: 0; margin-right: 16px; font-size: 14px; }

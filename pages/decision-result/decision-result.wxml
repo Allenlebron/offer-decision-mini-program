@@ -23,6 +23,7 @@
       <view class="decision-section">
         <view class="decision-subtitle">填写提醒</view>
         <view wx:for="{{result.checks}}" wx:key="*this" class="result-check"><text aria-hidden="true">·</text><text>{{item}}</text></view>
+        <button wx:if="{{hasChecks}}" class="method-toggle" bindtap="openChecks" hover-class="decision-pressed"><text>数字之外，决定前再核对</text><text aria-hidden="true">›</text></button>
       </view>
       <button class="method-toggle" bindtap="toggleMethod" hover-class="decision-pressed" aria-expanded="{{showMethod}}"><text>计算口径</text><text aria-hidden="true">{{showMethod ? '−' : '＋'}}</text></button>
       <view wx:if="{{showMethod}}" class="decision-muted"><text wx:for="{{result.assumptions}}" wx:key="*this" class="decision-paragraph">{{item}}</text></view>

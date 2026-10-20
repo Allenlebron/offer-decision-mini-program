@@ -6,7 +6,7 @@ Page({
     details: { water: false, sleep: false, exercise: false }, progressExpanded: false, feedbackKind: "", scene: {}, cup: 250, cupIndex: 1,
     cups: CUPS.map((value) => `${value} ml`), feelings: FEELINGS, feelingIndex: 0,
     goalsForm: { water: 0, sleep: 0, strength: 0 }, goalFields: [], goals: {}, day: { water: [], sleep: null, exercise: [] }, stats: {}, week: {}, recent: [], recentEntries: [], recentRecordedDays: 0, rings: [], dailyComplete: false,
-    celebrationOpen: false, celebrationDate: "", celebrationGoals: [], confetti: Array.from({ length: 10 }, (_, i) => ({
+    celebrationOpen: false, celebrationDate: "", celebrationGoals: [], celebrationExercise: {}, celebrationScrollHeight: 448, confetti: Array.from({ length: 10 }, (_, i) => ({
       left: 8 + i * 9, drift: (i % 2 ? 1 : -1) * (12 + i * 2), rotate: i * 37,
       delay: i % 4 * 60, color: ["#2463FF", "#7952C7", "#16785C", "#D9AA5B"][i % 4],
     })) },
@@ -243,9 +243,20 @@ Page({
     const today = dateKey();
     const achievement = dailyAchievement(this.state, today);
     if (!achievement.complete || this.data.selected !== today) return;
+    const day = dayData(this.state, today);
+    const strength = goalProgress(this.state, today).find((item) => item.id === "strength");
+    const exercise = {
+      minutes: summary(this.state, today).minutes,
+      detail: TYPES.filter((type) => day.exercise.some((item) => item.type === type))
+        .map((type) => `${type} ${day.exercise.filter((item) => item.type === type).reduce((sum, item) => sum + item.minutes, 0)} 分钟`).join(" · "),
+      strengthText: strength.valueText,
+      strengthStatus: !strength.goal ? "未设周目标" : strength.percent >= 100 ? "周目标已达成" : "按周积累",
+      restPlanned: day.plan === "rest",
+    };
     wx.hideKeyboard();
     wx.hideTabBar({ animation: false });
-    this.setData({ celebrationOpen: true, celebrationDate: today, celebrationGoals: achievement.goals });
+    this.setData({ celebrationOpen: true, celebrationDate: today, celebrationGoals: achievement.goals, celebrationExercise: exercise,
+      celebrationScrollHeight: Math.max(160, Math.min(448, wx.getWindowInfo().windowHeight - 200)) });
   },
   closeCelebration() {
     if (!this.data.celebrationOpen) return;

@@ -105,6 +105,8 @@
         <text aria-hidden="true">›</text>
       </button>
 
+      <button class="break-even-button" bindtap="openChecks" hover-class="break-even-button-active"><text>数字之外，决定前再核对</text><text aria-hidden="true">›</text></button>
+
       <view class="result-footer">
         <text>综合价值 = 税前保证收入 + 公司公积金年缴。</text>
         <text>按 48 个工作周和 240 个通勤日估算；未计个税、个人扣款、公司五险及浮动收入。</text>

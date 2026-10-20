@@ -9,7 +9,7 @@
     <view wx:for="{{fields}}" wx:key="key" id="field-{{item.key}}" class="decision-field">
       <label for="input-{{item.key}}" class="field-name">{{item.label}}<text wx:if="{{item.optional}}" class="decision-local"> · 可选</text></label>
       <view class="decision-input-wrap {{item.error ? 'input-invalid' : ''}}">
-        <input id="input-{{item.key}}" class="decision-input mono-data" type="{{item.text ? 'text' : item.precision === 0 ? 'number' : 'digit'}}" value="{{item.value}}" maxlength="{{item.text ? 12 : 16}}" placeholder="{{item.optional ? '不填则使用住处 A / B' : '请填写'}}" placeholder-style="color:#66748A" cursor-spacing="32" confirm-type="{{index !== fields.length - 1 ? 'next' : 'done'}}" focus="{{focusKey === item.key}}" data-key="{{item.key}}" bindinput="onInput" bindblur="onBlur" bindconfirm="focusNext" aria-label="{{item.label}}，{{item.unit || '可选'}}" aria-invalid="{{item.error ? 'true' : 'false'}}" aria-describedby="hint-{{item.key}}" />
+        <input id="input-{{item.key}}" class="decision-input mono-data" type="{{item.text ? 'text' : item.precision === 0 ? 'number' : 'digit'}}" value="{{item.value}}" maxlength="{{item.text ? 12 : 16}}" placeholder="{{item.optional ? (item.text ? '不填则使用住处 A / B' : '不知道可留空') : '请填写'}}" placeholder-style="color:#66748A" cursor-spacing="32" confirm-type="{{index !== fields.length - 1 ? 'next' : 'done'}}" focus="{{focusKey === item.key}}" data-key="{{item.key}}" bindinput="onInput" bindblur="onBlur" bindconfirm="focusNext" aria-label="{{item.label}}，{{item.unit || '可选'}}" aria-invalid="{{item.error ? 'true' : 'false'}}" aria-describedby="hint-{{item.key}}" />
         <text wx:if="{{item.unit}}" class="input-unit">{{item.unit}}</text>
       </view>
       <text id="hint-{{item.key}}" class="field-help" role="{{item.error ? 'alert' : 'text'}}">{{item.error || item.hint}}</text>
@@ -17,7 +17,7 @@
   </view>
   <view class="decision-actions form-actions">
     <button wx:if="{{step > 0}}" class="decision-secondary" bindtap="previous" hover-class="decision-pressed">上一步</button>
-    <button class="decision-primary" bindtap="next" loading="{{submitting}}" disabled="{{submitting}}" hover-class="decision-pressed">{{step !== steps.length - 1 ? '下一步：住处 B' : '查看结果'}}</button>
+    <button class="decision-primary" bindtap="next" loading="{{submitting}}" disabled="{{submitting}}" hover-class="decision-pressed">{{step !== steps.length - 1 ? '下一步：' + steps[step + 1] : '查看结果'}}</button>
   </view>
   <view class="form-footer"><button class="decision-link" bindtap="reset" hover-class="decision-pressed">重新填写</button><button class="decision-link" bindtap="goHome" hover-class="decision-pressed">返回首页</button></view>
 </view>

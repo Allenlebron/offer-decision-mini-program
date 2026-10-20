@@ -132,19 +132,36 @@
   </block>
 </view>
 <view wx:if="{{celebrationOpen}}" class="celebration-backdrop" bindtap="closeCelebration" catchtouchmove="keepCelebrationOpen">
-  <view class="celebration-dialog" role="dialog" aria-modal="true" aria-label="今日目标已达成" catchtap="keepCelebrationOpen">
-    <button class="celebration-close" aria-label="关闭庆祝弹框" bindtap="closeCelebration">×</button>
+  <view class="celebration-dialog" role="dialog" aria-modal="true" aria-label="每日目标已达成" catchtap="keepCelebrationOpen">
+    <view class="celebration-header"><text class="celebration-date">{{celebrationDate}}</text><button class="celebration-close" aria-label="关闭庆祝弹框" bindtap="closeCelebration"><view class="close-stroke"></view></button></view>
     <view class="celebration-confetti" aria-hidden="true">
       <view wx:for="{{confetti}}" wx:key="index" class="celebration-piece" style="left: {{item.left}}%; --drift: {{item.drift}}px; --rotate: {{item.rotate}}deg; animation-delay: {{item.delay}}ms; background: {{item.color}};"></view>
     </view>
-    <text class="celebration-date">{{celebrationDate}}</text>
-    <view class="celebration-medal" aria-hidden="true"><view class="medal-orbit"></view><view class="medal-core"><view class="medal-check"></view></view><view class="medal-spark spark-one"></view><view class="medal-spark spark-two"></view><view class="medal-spark spark-three"></view></view>
-    <view class="celebration-title" role="heading" aria-level="2">今天的小目标，<view>都完成了。</view></view>
-    <text class="celebration-copy">这一刻，值得为自己开心。</text>
-    <view class="celebration-results">
-      <view wx:for="{{celebrationGoals}}" wx:key="id" class="celebration-result"><view class="celebration-goal"><text>{{item.label}}</text><text class="celebration-value mono-data">{{item.valueText}}</text></view><text class="celebration-tick" aria-label="已达成">✓</text></view>
+    <scroll-view scroll-y="{{true}}" class="celebration-scroll" style="height: {{celebrationScrollHeight}}px;">
+      <view class="celebration-content">
+        <view class="celebration-medal" aria-hidden="true"><view class="medal-check"></view></view>
+        <view class="celebration-title" role="heading" aria-level="2">每日目标达成</view>
+        <text class="celebration-copy">这一刻，值得为自己开心。</text>
+        <view class="celebration-results">
+          <view wx:for="{{celebrationGoals}}" wx:key="id" class="celebration-result">
+            <view class="celebration-goal"><text class="celebration-label">{{item.label}}<text class="celebration-period">今日</text></text><text class="celebration-value">{{item.valueText}}</text></view>
+            <view class="celebration-tick" role="img" aria-label="每日目标已达成"></view>
+          </view>
+          <view class="celebration-exercise">
+            <view class="celebration-exercise-heading"><text class="celebration-label">运动<text class="celebration-period">今日</text></text><text class="celebration-exercise-total">{{celebrationExercise.minutes ? celebrationExercise.minutes + ' 分钟' : '未记录'}}</text></view>
+            <text wx:if="{{celebrationExercise.detail}}" class="celebration-exercise-detail">{{celebrationExercise.detail}}</text>
+            <text wx:elif="{{celebrationExercise.restPlanned}}" class="celebration-exercise-detail">今天安排恢复，未计为运动记录。</text>
+            <text wx:else class="celebration-exercise-detail">今天没记运动，也可以留给休息。</text>
+            <view class="celebration-week"><text>本周力量训练</text><text>{{celebrationExercise.strengthText}}</text></view>
+            <text class="celebration-week-status">{{celebrationExercise.strengthStatus}} · 运动按周看，不必每天练</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="celebration-actions">
+      <button class="celebration-share" open-type="share" hover-class="celebration-pressed">分享这份好心情</button>
+      <text class="celebration-share-note">分享不含个人记录</text>
+      <button class="celebration-done" bindtap="closeCelebration" hover-class="celebration-pressed">收下这份鼓励</button>
     </view>
-    <button class="celebration-share" open-type="share">分享这份好心情</button>
-    <button class="celebration-done" bindtap="closeCelebration">收下这份鼓励</button>
   </view>
 </view>

@@ -5,6 +5,7 @@
     "pages/home/home",
     "pages/decision/decision",
     "pages/decision-result/decision-result",
+    "pages/decision-check/decision-check",
     "pages/about/about",
     "pages/calculator/calculator",
     "pages/result/result",

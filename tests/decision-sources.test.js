@@ -11,12 +11,14 @@ test("bundled reference distinguishes source verification from policy review", (
   assert.match(source.adaptation, /重新设计/);
   assert.match(source.reviewScope, /不代表逐条验证/);
   assert.match(source.versionLabel, /可能更新/);
+  assert.match(source.articleUrl, /\/blob\/[a-f0-9]{40}\//);
+  assert.match(source.adaptation, /不移植研究数字/);
   assert.match(CONTENT_NOTICE, /填写提醒/);
   assert.match(CONTENT_NOTICE, /不冒充研究结论/);
 });
 
 test("each scenario has a model explanation rather than a universal recommendation", () => {
-  assert.deepEqual(METHOD_NOTES.map((note) => note.id), ["habits", "offer", "rent", "budget"]);
+  assert.deepEqual(METHOD_NOTES.map((note) => note.id), ["habits", "offer", "rent", "budget", "study", "purchase", "city", "side"]);
   assert.match(METHOD_NOTES[0].body, /空白睡眠不按零小时/);
   assert.match(METHOD_NOTES[1].body, /不是税后到账收入/);
   assert.match(METHOD_NOTES[2].body, /未计押金/);
@@ -24,7 +26,7 @@ test("each scenario has a model explanation rather than a universal recommendati
 });
 
 test("public source links cannot contain caller supplied URLs or private values", () => {
-  for (const id of ["project", "article", "license"]) {
+  for (const id of ["project", "article", "license", "study-source", "purchase-source", "side-source"]) {
     const url = new URL(getPublicSourceUrl(id));
     assert.equal(url.protocol, "https:");
     assert.equal(url.search, "");
@@ -41,7 +43,8 @@ test("privacy copy states device limitations without promising encryption or rec
   assert.match(text, /不是加密保险箱/);
   assert.match(text, /没有云端备份/);
   assert.match(text, /当前场景/);
-  assert.match(text, /三个场景/);
+  assert.match(text, /七个场景/);
+  assert.match(text, /核对.*按场景/);
   assert.match(text, /平台自身/);
   assert.match(text, /不携带个人输入/);
 });

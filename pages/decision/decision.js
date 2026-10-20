@@ -1,11 +1,11 @@
-const { SCENARIOS, EXAMPLES, createDraft, validateDecision, validateDecisionField } = require("../../utils/decision-data");
+const { SCENARIOS, EXAMPLES, isDecisionScenario, createDraft, validateDecision, validateDecisionField } = require("../../utils/decision-data");
 const { readDraft, saveDraft, clearDraft } = require("../../utils/decision-storage");
 const { enableShareMenu, scenarioShare } = require("../../utils/share");
 
 Page({
   data: { scenario: "", title: "", description: "", values: {}, fields: [], steps: [], step: 0, errors: {}, isExample: false, storageNotice: "", generalError: "", submitting: false, focusKey: "" },
   onLoad(options = {}) {
-    const scenario = options.scenario === "budget" ? "budget" : "rent";
+    const scenario = isDecisionScenario(options.scenario) ? options.scenario : "rent";
     const definition = SCENARIOS[scenario];
     const saved = readDraft(scenario);
     this.setData({ scenario, title: definition.title, description: definition.description, steps: definition.steps,
@@ -45,7 +45,7 @@ Page({
   },
   showErrors(errors) {
     const first = SCENARIOS[this.data.scenario].fields.find((field) => errors[field.key]);
-    this.setData({ errors, step: first.step, generalError: "请检查标出的项目；没有金额或时间请填 0。" });
+    this.setData({ errors, step: first.step, generalError: "请检查标出的项目，并按提示填写。" });
     this.refreshFields(() => wx.pageScrollTo({ selector: `#field-${first.key}`, duration: 0 }));
   },
   next() {

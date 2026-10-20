@@ -21,12 +21,23 @@
 .entry-icon { width: 44px; height: 44px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 20px; }
 .entry-icon-rent { background: #eef4ff; }
 .entry-icon-budget { background: #fff7e8; }
+.entry-icon-study, .entry-icon-purchase, .entry-icon-city, .entry-icon-side { background: var(--accent-soft); color: var(--accent-strong); }
+.entry-symbol { position: relative; box-sizing: border-box; width: 22px; height: 20px; border: 2px solid currentColor; border-radius: 2px; }
+.symbol-study::after { content: ""; position: absolute; top: -2px; bottom: -2px; left: 8px; border-left: 1px solid currentColor; }
+.symbol-purchase { height: 18px; border-radius: 3px; }
+.symbol-purchase::after { content: ""; position: absolute; top: 4px; left: 0; right: 0; border-top: 2px solid currentColor; }
+.symbol-city { width: 14px; height: 24px; margin-right: 8px; border-radius: 1px; }
+.symbol-city::after { content: ""; position: absolute; left: 14px; bottom: -2px; width: 6px; height: 14px; border: 2px solid currentColor; border-radius: 1px; }
+.symbol-side { height: 16px; margin-top: 4px; border-radius: 3px; }
+.symbol-side::after { content: ""; position: absolute; left: 4px; top: -7px; width: 8px; height: 4px; border: 2px solid currentColor; border-bottom: 0; border-radius: 3px 3px 0 0; }
 .entry-copy { flex: 1; min-width: 0; }
 .entry-heading { color: var(--text-primary); font-size: 16px; font-weight: 650; }
 .entry-description { margin-top: 3px; color: var(--text-secondary); font-size: 13px; }
 .entry-arrow { flex: none; margin-left: 4px; color: var(--text-muted); font-size: 20px; }
 .draft-note { display: inline-block; margin-top: 6px; color: var(--accent-strong); font-size: 12px; font-weight: 600; }
 .entry-pressed { transform: scale(0.98); background: var(--surface-muted); }
+.home-page button.check-entry { display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; width: 100%; max-width: none; min-height: 88px; margin: 24px 0 0; padding: 16px 0; border-top: 1px solid var(--border-light); border-radius: 0; background: transparent; text-align: left; white-space: normal; line-height: 1.5; }
+.check-entry .entry-description { color: #526178; }
 
 .home-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
 .privacy-note { color: var(--text-muted); font-size: 12px; }

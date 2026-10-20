@@ -7,8 +7,13 @@ function scenarioShare(scenario) {
     habits: { title: "薄肌、大水、大睡，把生活过得更有劲", path: "/pages/habits/habits", imageUrl: "/images/share-habits.png" },
     rent: { title: "住近一点值不值？算算房租与通勤", path: "/pages/decision/decision?scenario=rent" },
     budget: { title: "暂时不工作，现有预算能覆盖多久？", path: "/pages/decision/decision?scenario=budget" },
+    study: { title: "学习投入：算清费用、时间和回本条件", path: "/pages/decision/decision?scenario=study" },
+    purchase: { title: "买、租、继续用，同周期算成本", path: "/pages/decision/decision?scenario=purchase" },
+    city: { title: "换城市生活：比较月结余与迁居支出", path: "/pages/decision/decision?scenario=city" },
+    side: { title: "副业尝试：先算清一单能留下多少", path: "/pages/decision/decision?scenario=side" },
   };
-  return { imageUrl: SHARE_IMAGE, ...(entries[scenario] || { title: "真涨薪｜算清工作与生活的取舍", path: "/pages/home/home" }) };
+  const entry = Object.prototype.hasOwnProperty.call(entries, scenario) ? entries[scenario] : { title: "真涨薪｜算清工作与生活的取舍", path: "/pages/home/home" };
+  return { imageUrl: SHARE_IMAGE, ...entry };
 }
 
 function buildSharePath(source) {

@@ -15,6 +15,8 @@
       <text class="decision-paragraph decision-muted">{{item.limitations}}</text>
       <text class="decision-paragraph decision-muted">{{item.versionLabel}}。授权：{{item.licenseName}}。</text>
       <view class="source-links"><button class="decision-link" data-id="project" bindtap="copySource" hover-class="decision-pressed">复制项目链接</button><button class="decision-link" data-id="article" bindtap="copySource" hover-class="decision-pressed">复制篇目链接</button><button class="decision-link" data-id="license" bindtap="copySource" hover-class="decision-pressed">复制授权链接</button></view>
+      <text class="decision-paragraph decision-muted">学习与消费场景只参考下列篇目的选题和成本拆分思路，公式与输入由本产品设计，不直接沿用原书收益数字。</text>
+      <button wx:for="{{item.related}}" wx:for-item="related" wx:key="id" class="decision-link" data-id="{{related.id}}" bindtap="copySource" hover-class="decision-pressed">复制《{{related.title}}》链接</button>
     </view>
     <text class="decision-paragraph decision-muted">{{contentNotice}}</text>
   </view>
