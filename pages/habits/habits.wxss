@@ -35,6 +35,10 @@
 .section { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-light); }
 .picker-control { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 12px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--surface-raised); }
 .exercise-row { margin-top: 8px; font-size: 14px; border-bottom: 1px solid var(--border-light); }
+.exercise-record { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.exercise-row-actions, .exercise-edit-status { display: flex; align-items: center; gap: 12px; }
+.exercise-edit-status { justify-content: space-between; flex-wrap: wrap; color: #16785c; font-size: 14px; }
+.exercise-row-actions { flex: none; }
 .review-heading, .review-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .review-heading { margin-top: 8px; }
 .review-date { display: flex; align-items: center; gap: 8px; min-height: 48px; color: var(--accent-strong); font-size: 14px; font-weight: 600; }

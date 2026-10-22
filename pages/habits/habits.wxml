@@ -44,10 +44,11 @@
         <view class="day-plan"><button class="{{day.plan === 'train' ? 'plan-selected' : ''}}" data-plan="train" bindtap="planDay" aria-pressed="{{day.plan === 'train'}}">{{day.plan === 'train' ? '✓ ' : ''}}准备练一练</button><button class="{{day.plan === 'rest' ? 'plan-selected' : ''}}" data-plan="rest" bindtap="planDay" aria-pressed="{{day.plan === 'rest'}}">{{day.plan === 'rest' ? '✓ ' : ''}}留给恢复</button></view>
         <text class="habit-hint">{{day.plan === 'rest' ? '恢复也是安排。已有运动照常保留，也可以补记。' : '同一天多次训练只算一个训练日，不用每天练。'}}</text>
         <button class="habit-action exercise-action" data-key="exercise" bindtap="toggleDetail" aria-expanded="{{details.exercise}}">{{details.exercise ? '收起运动明细' : day.exercise.length ? '已记 ' + day.exercise.length + ' 次运动 · 查看 / 补记' : '完成运动，记一下'}}</button>
-        <view wx:if="{{details.exercise}}" class="habit-editor">
+        <view wx:if="{{details.exercise}}" id="exercise-editor" class="habit-editor">
+          <view wx:if="{{editExerciseIndex >= 0}}" class="exercise-edit-status"><text>修改第 {{editExerciseIndex + 1}} 条运动记录</text><button class="text-button" bindtap="cancelExerciseEdit">取消修改</button></view>
           <picker mode="selector" range="{{types}}" value="{{typeIndex}}" bindchange="chooseType"><view class="picker-control" aria-role="button" aria-label="选择运动类型">{{types[typeIndex]}}<text class="muted">更换⌄</text></view></picker>
-          <view class="input-action"><input type="number" value="{{minutesInput}}" data-key="minutesInput" bindinput="input" placeholder="运动了几分钟" aria-label="运动时长，分钟" maxlength="3" /><button class="small-action" bindtap="addExercise">记录</button></view>
-          <view wx:for="{{day.exercise}}" wx:key="index" class="exercise-row"><text>{{item.type}} · {{item.minutes}} 分钟</text><button class="text-button" data-index="{{index}}" bindtap="removeExercise" aria-label="删除{{item.type}}{{item.minutes}}分钟记录">删除</button></view>
+          <view class="input-action"><input type="number" value="{{minutesInput}}" data-key="minutesInput" bindinput="input" placeholder="运动了几分钟" aria-label="运动时长，分钟" maxlength="3" /><button class="small-action" bindtap="addExercise">{{editExerciseIndex >= 0 ? '保存' : '记录'}}</button></view>
+          <view wx:for="{{day.exercise}}" wx:key="index" class="exercise-row"><text class="exercise-record">{{item.type}} · {{item.minutes}} 分钟</text><view class="exercise-row-actions"><button class="text-button" data-index="{{index}}" bindtap="editExercise" disabled="{{editExerciseIndex >= 0}}" aria-label="修改第{{index + 1}}条{{item.type}}{{item.minutes}}分钟记录">修改</button><button class="text-button" data-index="{{index}}" bindtap="removeExercise" disabled="{{editExerciseIndex >= 0}}" aria-label="删除第{{index + 1}}条{{item.type}}{{item.minutes}}分钟记录">删除</button></view></view>
         </view>
       </view>
       <view id="habit-sleep" class="habit-block sleep-block">

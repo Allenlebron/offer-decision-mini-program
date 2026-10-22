@@ -84,6 +84,94 @@ test("failed writes leave stored and displayed records intact and can be retried
   wx.setStorageSync = save; page.addWater({ currentTarget: { dataset: { amount: 250 } } });
   assert.equal(page.data.stats.water, 250); assert.equal(h.load().data.stats.water, 250);
 });
+
+test("exercise edits replace only the selected record and preserve day metadata and other dates", () => {
+  const day = "2026-10-20"; let state = empty();
+  state = updateDay(state, day, "exercise", { type: "篮球", minutes: 30 });
+  state = updateDay(state, day, "exercise", { type: "跑步", minutes: 20 });
+  state = updateDay(state, day, "water", 250);
+  state = updateDay(state, day, "plan", "rest");
+  state = updateDay(state, "2026-10-19", "exercise", { type: "游泳", minutes: 60 });
+  const before = structuredClone(state);
+  const next = updateDay(state, day, "editExercise", { index: 0, type: "力量训练", minutes: 45 });
+  assert.deepEqual(state, before);
+  assert.deepEqual(next.days[day].exercise, [{ type: "力量训练", minutes: 45 }, { type: "跑步", minutes: 20 }]);
+  assert.deepEqual(next.days["2026-10-19"], before.days["2026-10-19"]);
+  assert.deepEqual(next.days[day].water, [250]); assert.equal(next.days[day].plan, "rest");
+  assert.equal(weekSummary(next, day).strengthDays, 1); assert.equal(summary(next, day).minutes, 65);
+  assert.equal(validState(next), true);
+});
+
+test("exercise edit validation rejects bad indexes and values without mutating records", () => {
+  const day = "2026-10-20"; const state = updateDay(empty(), day, "exercise", { type: "篮球", minutes: 30 });
+  const before = structuredClone(state);
+  for (const index of [-1, 1, 0.5, "0", null]) assert.throws(() => updateDay(state, day, "editExercise", { index, type: "跑步", minutes: 20 }));
+  for (const minutes of [0, 721, 1.5, "30", NaN]) assert.throws(() => updateDay(state, day, "editExercise", { index: 0, type: "跑步", minutes }));
+  assert.throws(() => updateDay(state, day, "editExercise", { index: 0, type: "不存在", minutes: 20 }));
+  assert.throws(() => updateDay(state, "2026-10-21", "editExercise", { index: 0, type: "跑步", minutes: 20 }, day));
+  assert.deepEqual(state, before);
+});
+
+test("exercise editing prefills, saves in place and refreshes history, weekly progress and celebration", () => {
+  const h = harness(); const today = dateKey(); let state = empty(); state.goals.water = 250; state.goals.strengthDays = 1;
+  state = updateDay(state, today, "water", 250); state = updateDay(state, today, "exercise", { type: "篮球", minutes: 30 });
+  h.storage.set(HABITS_KEY, state); const page = h.load();
+  page.editExercise({ currentTarget: { dataset: { index: 0 } } });
+  assert.equal(page.data.minutesInput, "30"); assert.equal(page.data.typeIndex, TYPES.indexOf("篮球"));
+  page.chooseType({ detail: { value: String(TYPES.indexOf("力量训练")) } }); page.input(event("minutesInput", "45")); page.addExercise();
+  assert.equal(page.data.editExerciseIndex, -1); assert.equal(page.data.details.exercise, true);
+  assert.deepEqual(page.data.day.exercise, [{ type: "力量训练", minutes: 45 }]);
+  assert.equal(page.data.week.strengthDays, 1); assert.equal(page.data.recentEntries[0].minutes, 45);
+  assert.equal(page.data.rings[2].status, "已达目标"); assert.equal(page.data.celebrationOpen, false);
+  page.openCelebration(); assert.equal(page.data.celebrationExercise.minutes, 45);
+  assert.equal(page.data.celebrationExercise.strengthStatus, "周目标已达成"); page.closeCelebration();
+  assert.deepEqual(h.load().data.day.exercise, [{ type: "力量训练", minutes: 45 }]);
+  page.editExercise({ currentTarget: { dataset: { index: 0 } } });
+  page.chooseType({ detail: { value: String(TYPES.indexOf("篮球")) } }); page.addExercise();
+  assert.equal(page.data.week.strengthDays, 0); assert.notEqual(page.data.rings[2].status, "已达目标");
+  page.openCelebration(); assert.equal(page.data.celebrationExercise.minutes, 45);
+  assert.notEqual(page.data.celebrationExercise.strengthStatus, "周目标已达成");
+});
+
+test("exercise editing cancellation and failed save preserve originals and allow retry", () => {
+  const h = harness(); const page = h.load(); page.input(event("minutesInput", "30")); page.addExercise();
+  const before = structuredClone(h.storage.get(HABITS_KEY));
+  page.editExercise({ currentTarget: { dataset: { index: 0 } } }); page.input(event("minutesInput", "60")); page.cancelExerciseEdit();
+  assert.equal(page.data.minutesInput, ""); assert.equal(page.data.editExerciseIndex, -1);
+  assert.deepEqual(h.storage.get(HABITS_KEY), before);
+  page.editExercise({ currentTarget: { dataset: { index: 0 } } }); page.input(event("minutesInput", "0")); page.addExercise();
+  assert.match(page.data.error, /运动时长/); assert.equal(page.data.editExerciseIndex, 0);
+  page.input(event("minutesInput", "60")); const save = wx.setStorageSync; wx.setStorageSync = () => { throw new Error("quota"); };
+  page.addExercise(); assert.match(page.data.error, /没有生效/);
+  assert.equal(page.data.day.exercise[0].minutes, 30); assert.equal(page.data.minutesInput, "60"); assert.equal(page.data.editExerciseIndex, 0);
+  assert.deepEqual(h.storage.get(HABITS_KEY), before);
+  wx.setStorageSync = save; page.addExercise(); assert.equal(page.data.day.exercise.length, 1); assert.equal(page.data.day.exercise[0].minutes, 60);
+});
+
+test("exercise editing cancels on date or tab changes and cannot shift indexes through deletion", () => {
+  const h = harness(); const page = h.load(); const today = dateKey();
+  page.input(event("minutesInput", "30")); page.addExercise();
+  page.editExercise({ currentTarget: { dataset: { index: 0 } } }); h.modals.push({ confirm: true });
+  page.removeExercise({ currentTarget: { dataset: { index: 0 } } }); assert.equal(page.data.day.exercise.length, 1);
+  page.editExercise({ currentTarget: { dataset: { index: 1 } } }); assert.equal(page.data.editExerciseIndex, 0);
+  page.chooseDate({ detail: { value: shiftDate(today, -1) } });
+  assert.equal(page.data.editExerciseIndex, -1); assert.equal(page.data.minutesInput, "");
+  assert.equal(page.data.day.exercise.length, 0); page.goToday();
+  page.editExercise({ currentTarget: { dataset: { index: 0 } } }); page.switchTab({ currentTarget: { dataset: { tab: "review" } } });
+  assert.equal(page.data.editExerciseIndex, -1); assert.equal(page.data.minutesInput, "");
+  assert.equal(h.storage.get(HABITS_KEY).days[today].exercise[0].minutes, 30);
+});
+
+test("exercise editing across midnight aborts instead of creating a record on another date", () => {
+  const h = harness(); const today = dateKey(); const yesterday = shiftDate(today, -1);
+  const state = updateDay(empty(), yesterday, "exercise", { type: "跑步", minutes: 30 });
+  h.storage.set(HABITS_KEY, state); const page = h.load(); page.chooseDate({ detail: { value: yesterday } });
+  page.editExercise({ currentTarget: { dataset: { index: 0 } } }); page.input(event("minutesInput", "60"));
+  page.setData({ today: yesterday }); page.addExercise();
+  assert.equal(page.data.selected, today); assert.equal(page.data.editExerciseIndex, -1);
+  assert.match(page.data.error, /日期已更新/); assert.deepEqual(h.storage.get(HABITS_KEY), state);
+  assert.equal(page.data.day.exercise.length, 0);
+});
 test("corrupt or unavailable storage blocks writes instead of overwriting old data", () => {
   const h = harness(); h.storage.set(HABITS_KEY, { version: 2 });
   const page = h.load(); page.addWater({ currentTarget: { dataset: { amount: 250 } } });

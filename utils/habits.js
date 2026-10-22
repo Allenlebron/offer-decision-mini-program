@@ -78,9 +78,12 @@ function updateDay(state, key, action, value, today = dateKey()) {
     day.sleep = hours;
     if (hours === null || value?.feeling === FEELINGS[0]) delete day.feeling;
     else if (value?.feeling) day.feeling = value.feeling;
-  } else if (action === "exercise") {
+  } else if (action === "exercise" || action === "editExercise") {
     if (!value || !TYPES.includes(value.type) || !numberIn(value.minutes, 1, 720, true)) throw new Error("运动时长请填 1–720 分钟的整数");
-    day.exercise.push({ type: value.type, minutes: value.minutes });
+    if (action === "editExercise") {
+      if (!Number.isInteger(value.index) || value.index < 0 || value.index >= day.exercise.length) throw new Error("这条记录已不存在，请重新选择");
+      day.exercise[value.index] = { type: value.type, minutes: value.minutes };
+    } else day.exercise.push({ type: value.type, minutes: value.minutes });
   } else if (action === "removeExercise") {
     if (!Number.isInteger(value) || value < 0 || value >= day.exercise.length) throw new Error("这条记录已不存在，请刷新");
     day.exercise.splice(value, 1);

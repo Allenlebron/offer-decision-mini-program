@@ -3,7 +3,7 @@ const { enableShareMenu, scenarioShare, celebrationShare } = require("../../util
 
 Page({
   data: { tab: "today", today: "", selected: "", status: "ready", error: "", notice: "", waterInput: "", sleepInput: "", minutesInput: "", typeIndex: 0, types: TYPES,
-    details: { water: false, sleep: false, exercise: false }, progressExpanded: false, feedbackKind: "", scene: {}, cup: 250, cupIndex: 1,
+    details: { water: false, sleep: false, exercise: false }, editExerciseIndex: -1, progressExpanded: false, feedbackKind: "", scene: {}, cup: 250, cupIndex: 1,
     cups: CUPS.map((value) => `${value} ml`), feelings: FEELINGS, feelingIndex: 0,
     goalsForm: { water: 0, sleep: 0, strength: 0 }, goalFields: [], goals: {}, day: { water: [], sleep: null, exercise: [] }, stats: {}, week: {}, recent: [], recentEntries: [], recentRecordedDays: 0, rings: [], dailyComplete: false,
     celebrationOpen: false, celebrationDate: "", celebrationGoals: [], celebrationExercise: {}, celebrationScrollHeight: 448, confetti: Array.from({ length: 10 }, (_, i) => ({
@@ -48,13 +48,13 @@ Page({
     if (this.data.today !== today) {
       this.closeCelebration();
       const selected = !this.data.selected || this.data.selected === this.data.today ? today : this.data.selected;
-      this.setData({ today, selected, waterInput: "", sleepInput: "", minutesInput: "", error: "", notice: "" });
+      this.setData({ today, selected, waterInput: "", sleepInput: "", minutesInput: "", editExerciseIndex: -1, error: "", notice: "" });
       this.render(); this.fillSleep();
     }
   },
   load() {
     const result = readHabits(); this.state = result.state;
-    this.setData({ status: result.status, error: "", notice: "", today: dateKey(), selected: this.data.selected || dateKey() });
+    this.setData({ status: result.status, error: "", notice: "", editExerciseIndex: -1, minutesInput: "", today: dateKey(), selected: this.data.selected || dateKey() });
     if (this.state) { this.render(); this.fillSleep(); this.fillGoals(); }
   },
   render() {
@@ -124,13 +124,14 @@ Page({
     this.setData({ goalsForm: { ...goals, strengthDays: goals.strengthDays || 0 }, goalFields });
   },
   switchTab(event) {
+    if (this.data.editExerciseIndex >= 0) this.cancelExerciseEdit();
     this.refreshDate(); this.setData({ tab: event.currentTarget.dataset.tab, error: "", notice: "" }, () => this.drawRings());
     if (this.data.tab === "settings" && this.state) this.fillGoals();
   },
   chooseDate(event) {
     const selected = event.detail.value;
     if (!validDate(selected) || selected > dateKey()) return;
-    this.setData({ selected, error: "", notice: "", feedbackKind: "", waterInput: "", minutesInput: "", details: { water: false, sleep: false, exercise: false } }); this.render(); this.fillSleep();
+    this.setData({ selected, error: "", notice: "", feedbackKind: "", waterInput: "", minutesInput: "", editExerciseIndex: -1, details: { water: false, sleep: false, exercise: false } }); this.render(); this.fillSleep();
   },
   openDay(event) {
     const date = event.detail?.value || event.currentTarget.dataset.date;
@@ -205,10 +206,31 @@ Page({
     }
   },
   addExercise() {
-    const value = { type: TYPES[this.data.typeIndex], minutes: parseNumber(this.data.minutesInput, 1, 720, true) };
-    if (this.change("exercise", value, "这次运动，记下了。也给恢复留点时间。", "exercise")) this.setData({ minutesInput: "", details: { ...this.data.details, exercise: false } });
+    const editing = this.data.editExerciseIndex >= 0;
+    this.refreshDate();
+    if (editing && this.data.editExerciseIndex < 0) { this.showError("日期已更新，未保存修改。请重新选择记录。"); return; }
+    const value = { type: TYPES[this.data.typeIndex], minutes: parseNumber(this.data.minutesInput, 1, 720, true), index: this.data.editExerciseIndex };
+    if (this.change(editing ? "editExercise" : "exercise", value, editing ? "运动记录已更新，周统计已同步。" : "这次运动，记下了。也给恢复留点时间。", "exercise")) {
+      this.setData({ minutesInput: "", editExerciseIndex: -1, details: { ...this.data.details, exercise: editing } });
+    }
+  },
+  editExercise(event) {
+    if (!this.state || this.data.editExerciseIndex >= 0) return;
+    const selected = this.data.selected;
+    this.refreshDate();
+    if (selected !== this.data.selected) return;
+    const index = Number(event.currentTarget.dataset.index);
+    const record = Number.isInteger(index) && dayData(this.state, selected).exercise[index];
+    if (!record) { this.showError("这条记录已不存在，请重新选择"); return; }
+    this.setData({ editExerciseIndex: index, typeIndex: TYPES.indexOf(record.type), minutesInput: String(record.minutes),
+      details: { ...this.data.details, exercise: true }, error: "", notice: "" },
+    () => wx.pageScrollTo({ selector: "#exercise-editor", duration: 200 }));
+  },
+  cancelExerciseEdit() {
+    this.setData({ editExerciseIndex: -1, minutesInput: "", typeIndex: 0, error: "", notice: "" });
   },
   removeExercise(event) {
+    if (this.data.editExerciseIndex >= 0) return;
     const index = Number(event.currentTarget.dataset.index);
     const selected = this.data.selected;
     wx.showModal({ title: "删除这条运动记录？", content: "删除后周统计会一起更新。", confirmText: "删除", success: (result) => {
